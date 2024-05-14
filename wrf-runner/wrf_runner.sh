@@ -47,4 +47,4 @@ $WRF_HOME/run/real.exe
 $WRF_HOME/run/wrf.exe
 
 # Report status
-status=$? && [ $status -eq 0 ] && echo "Run successful" || echo "Run failed"
+status=$? && [ $status -eq 0 ] && echo "Run successful"
