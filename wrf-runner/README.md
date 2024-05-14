@@ -40,7 +40,7 @@ namelists from the command line. Beware that:
 
 ## To do
 
-* Use MODIS_LCZ landuse with wudapt-to-wrf
+* Use MODIS_LCZ landuse with wudapt-to-wrf (checkout [this branch](https://github.com/matthiasdemuzere/w2w/pull/127#issuecomment-2066019831))
 * Use the "standard" heatwave case for amsterdam
 * Use IFS analysis for initial/boundary conditions
 * Use custom WUR landuse from summer in the city (checkout different branch of WRF?)
