@@ -4,7 +4,7 @@ import numpy as np
 import pwd
 import sys
 
-datapath = sys.argv[0] # set full datapath
+datapath = sys.argv[1] # set full datapath
 
 domain = 'd04' # select domain
 

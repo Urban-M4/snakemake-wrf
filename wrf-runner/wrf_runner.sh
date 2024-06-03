@@ -14,10 +14,13 @@ module load 2023
 module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
 module load Python/3.11.3-GCCcore-12.3.0
 
+# TODO Check if venv exists first. 
+python -m venv venv
+source venv/bin/activate
 # For modifying namelists programmatically
-pip install --user f90nml
+pip install f90nml
 # TODO Install from pypi once branch is merged and released. 
-# Might also not need python script.
+# Might also not need python script. Also not rerun if already installed.
 pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
 
 # Set some paths
@@ -45,7 +48,7 @@ $WPS_HOME/geogrid.exe
 
 # Run W2W
 w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
-python3 ../fix_w2w_lu_index.py $RUNDIR
+python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
 mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
 mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
 mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
@@ -57,6 +60,7 @@ $WPS_HOME/metgrid.exe
 
 # Run WRF
 f90nml $WRF_RUNNER/namelist.input namelist.input
+ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
 $WRF_HOME/run/real.exe
 $WRF_HOME/run/wrf.exe
 
