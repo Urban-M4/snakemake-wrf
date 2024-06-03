@@ -16,7 +16,9 @@ module load Python/3.11.3-GCCcore-12.3.0
 
 # For modifying namelists programmatically
 pip install --user f90nml
-pip install --user git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version 
+# TODO Install from pypi once branch is merged and released. 
+# Might also not need python script.
+pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
 
 # Set some paths
 export NETCDF=/sw/arch/RHEL8/EB_production/2023/software/netCDF-Fortran/4.6.1-gompi-2023a
@@ -40,12 +42,16 @@ ln -sf $WPS_HOME/ungrib/Variable_Tables/Vtable.GFS Vtable
 ln -sf $WPS_HOME/geogrid/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
 $WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/gfs-data/*"
 $WPS_HOME/geogrid.exe
+
+# Run W2W
 w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
 python3 ../fix_w2w_lu_index.py $RUNDIR
 mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
 mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
 mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
 mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
+
+# Continue with WPS
 $WPS_HOME/ungrib.exe
 $WPS_HOME/metgrid.exe
 
