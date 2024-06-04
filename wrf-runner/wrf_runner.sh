@@ -64,14 +64,9 @@ $WPS_HOME/metgrid.exe
 
 # Link relevant files
 ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
-ln -sf $WRF_HOME/run/LANDUSE.TBL LANDUSE.TBL
-ln -sf $WRF_HOME/run/ozone_plev.formatted ozone_plev.formatted
-ln -sf $WRF_HOME/run/ozone_lat.formatted ozone_lat.formatted
-ln -sf $WRF_HOME/run/ozone.formatted ozone.formatted
-
-ln -sf $WRF_HOME/run/aerosol_lat.formatted aerosol_lat.formatted
-ln -sf $WRF_HOME/run/aerosol_lon.formatted aerosol_lon.formatted
-ln -sf $WRF_HOME/run/aerosol_plev.formatted aerosol_plev.formatted
+ln -sf $WRF_HOME/run/ozone* $RUNDIR
+ln -sf $WRF_HOME/run/RRTMG* $RUNDIR
+ln -sf $WRF_HOME/run/*.TBL $RUNDIR
 
 # Run WRF
 f90nml $WRF_RUNNER/namelist.input namelist.input
