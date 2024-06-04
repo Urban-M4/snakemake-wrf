@@ -14,15 +14,6 @@ module load 2023
 module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
 module load Python/3.11.3-GCCcore-12.3.0
 
-# TODO Check if venv exists first. 
-python -m venv venv
-source venv/bin/activate
-# For modifying namelists programmatically
-pip install f90nml
-# TODO Install from pypi once branch is merged and released. 
-# Might also not need python script. Also not rerun if already installed.
-pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
-
 # Set some paths
 export NETCDF=/sw/arch/RHEL8/EB_production/2023/software/netCDF-Fortran/4.6.1-gompi-2023a
 export WPS_HOME=$HOME/wrf-model/WPS
@@ -30,6 +21,19 @@ export WRF_HOME=$HOME/wrf-model/WRF
 export WRF_RUNNER=$HOME/Urban-M4/misc/wrf-runner
 export OUTPUT_DIR=$HOME/Urban-M4/experiments
 export DATA_HOME=/projects/0/prjs0914/wrf-data/default
+
+# Create venv if it doesn't exist
+if test -d $WRF_RUNNER/venv; then
+  source venv/bin/activate
+else
+  python -m venv venv
+  source venv/bin/activate
+  # For modifying namelists programmatically
+  pip install f90nml
+  # TODO Install from pypi once branch is merged and released. 
+  # Might also not need python script. Also not rerun if already installed.
+  pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
+fi
 
 # Make new run directory
 export RUNDIR=$OUTPUT_DIR/$(date +"%Y-%m-%d_%H-%M-%S")
@@ -58,9 +62,19 @@ mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
 $WPS_HOME/ungrib.exe
 $WPS_HOME/metgrid.exe
 
+# Link relevant files
+ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
+ln -sf $WRF_HOME/run/LANDUSE.TBL LANDUSE.TBL
+ln -sf $WRF_HOME/run/ozone_plev.formatted ozone_plev.formatted
+ln -sf $WRF_HOME/run/ozone_lat.formatted ozone_lat.formatted
+ln -sf $WRF_HOME/run/ozone.formatted ozone.formatted
+
+ln -sf $WRF_HOME/run/aerosol_lat.formatted aerosol_lat.formatted
+ln -sf $WRF_HOME/run/aerosol_lon.formatted aerosol_lon.formatted
+ln -sf $WRF_HOME/run/aerosol_plev.formatted aerosol_plev.formatted
+
 # Run WRF
 f90nml $WRF_RUNNER/namelist.input namelist.input
-ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
 $WRF_HOME/run/real.exe
 $WRF_HOME/run/wrf.exe
 
