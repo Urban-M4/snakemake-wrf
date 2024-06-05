@@ -4,7 +4,7 @@
 #SBATCH --nodes=1                     # Number of nodes
 #SBATCH --ntasks-per-node=4           # Number of tasks per node
 #SBATCH --cpus-per-task=1             # Number of CPU cores per task
-#SBATCH --time=1:00:00                # Maximum runtime (D-HH:MM:SS)
+#SBATCH --time=8:00:00                # Maximum runtime (D-HH:MM:SS)
 
 # Security; fail on first error; explicit vars only
 set -euxo pipefail
@@ -31,7 +31,7 @@ else
   # For modifying namelists programmatically
   pip install f90nml
   # TODO Install from pypi once branch is merged and released. 
-  # Might also not need python script. Also not rerun if already installed.
+  # Might also not need python script.
   pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
 fi
 
@@ -62,7 +62,7 @@ mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
 $WPS_HOME/ungrib.exe
 $WPS_HOME/metgrid.exe
 
-# Link relevant files
+# Link relevant files for WRF
 ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
 ln -sf $WRF_HOME/run/ozone* $RUNDIR
 ln -sf $WRF_HOME/run/RRTMG* $RUNDIR
