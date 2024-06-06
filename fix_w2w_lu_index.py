@@ -4,7 +4,7 @@ import numpy as np
 import pwd
 import sys
 
-datapath = "./amsterdam_case" # set full datapath
+datapath = sys.argv[1] # set full datapath
 
 domain = 'd04' # select domain
 
