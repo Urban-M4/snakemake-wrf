@@ -1,0 +1,15 @@
+DOMAINS = ['d01', 'd02', 'd03', 'd04']
+# OUTPUT_DIR = "~/Urban-M4/experiments/"
+
+import time
+TIMESTAMP = time.strftime('%Y-%d-%m_%H-%M-%S')
+DIRECTORY = "~/Urban-M4/experiments/"+ TIMESTAMP
+
+rule CREATE_EXPERIMENT_DIR:
+    output: directory(DIRECTORY)
+
+
+# rule GEOGRID:
+#     input: "namelist.wps"
+#     output: expand("geo_em.{domain}.nc", domain=DOMAINS)
+#     shell: "./geogrid.exe"

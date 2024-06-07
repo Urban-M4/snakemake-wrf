@@ -1,0 +1,22 @@
+DOMAINS = ['d01', 'd02', 'd03', 'd04']
+
+envvars:
+    "NETCDF",
+
+WPS_HOME= "~/wrf-model/WPS"
+WRF_HOME= "~/wrf-model/WRF"
+WRF_RUNNER= "~/Urban-M4/misc/wrf-runner"
+# OUTPUT_DIR= "~/Urban-M4/experiments"
+DATA_HOME= "/projects/0/prjs0914/wrf-data/default"
+
+
+rule GEOGRID:
+    input: "namelist.wps"
+    output: expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS)
+    shell:
+        f"""
+        mkdir -p output/geogrid
+        {WPS_HOME}/geogrid.exe
+        """
+
+
