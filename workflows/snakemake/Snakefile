@@ -1,4 +1,5 @@
 DOMAINS = ['d01', 'd02', 'd03', 'd04']
+TIMES = range(13)  # TODO: include dates, make more flexible?
 
 workdir: "/home/pkalverla1/Urban-M4/experiments/snakemake"
 
@@ -13,8 +14,7 @@ DATA_HOME= "/projects/0/prjs0914/wrf-data/default"
 
 rule all:
     input:
-        expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS),
-        [f"FILE:2024-04-19_{t:02d}" for t in range(13)]
+        expand("output/metgrid/met_em.{d}.2024-04-19_{t:02d}:00:00.nc", d=DOMAINS, t=TIMES)
 
 rule CREATE_WORKDIR:
     input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL")
@@ -32,7 +32,7 @@ rule GEOGRID:
 
 rule UNGRIB:
     input: "namelist.wps"
-    output: [f"FILE:2024-04-19_{t:02d}" for t in range(13)]
+    output: [f"FILE:2024-04-19_{t:02d}" for t in TIMES]
     shell: f"""
         {WPS_HOME}/link_grib.csh {DATA_HOME}/real-time/gfs-data/*
         ln -sf {WPS_HOME}/ungrib/Variable_Tables/Vtable.GFS Vtable
@@ -40,3 +40,17 @@ rule UNGRIB:
         rm GRIBFILE.*
     """
     # TODO: move gribfiles to own dir, but not supported by WPS, so after metgrid
+
+rule METGRID:
+    input:
+        "namelist.wps",
+        [f"FILE:2024-04-19_{t:02d}" for t in range(13)],
+        expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS),
+    output: expand("output/metgrid/met_em.{d}.2024-04-19_{t:02d}:00:00.nc", d=DOMAINS, t=TIMES)
+    shell:
+        f"""
+        mkdir -p output/metgrid
+        cp {WPS_HOME}/metgrid/METGRID.TBL.ARW METGRID.TBL
+        {WPS_HOME}/metgrid.exe
+        """
+
