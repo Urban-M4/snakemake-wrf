@@ -1,17 +1,28 @@
 DOMAINS = ['d01', 'd02', 'd03', 'd04']
 
+workdir: "/home/pkalverla1/Urban-M4/experiments/snakemake"
+
 envvars:
     "NETCDF",
 
 WPS_HOME= "~/wrf-model/WPS"
 WRF_HOME= "~/wrf-model/WRF"
 WRF_RUNNER= "~/Urban-M4/misc/wrf-runner"
-# OUTPUT_DIR= "~/Urban-M4/experiments"
 DATA_HOME= "/projects/0/prjs0914/wrf-data/default"
 
 
+rule all:
+    input:
+        expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS),
+        [f"FILE:2024-04-19_{t:02d}" for t in range(13)]
+
+rule CREATE_WORKDIR:
+    input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL")
+    output: "namelist.wps", "GEOGRID.TBL"
+    shell: "cp {input} ."
+
 rule GEOGRID:
-    input: "namelist.wps"
+    input: "namelist.wps", "GEOGRID.TBL"
     output: expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS)
     shell:
         f"""
@@ -19,4 +30,13 @@ rule GEOGRID:
         {WPS_HOME}/geogrid.exe
         """
 
-
+rule UNGRIB:
+    input: "namelist.wps"
+    output: [f"FILE:2024-04-19_{t:02d}" for t in range(13)]
+    shell: f"""
+        {WPS_HOME}/link_grib.csh {DATA_HOME}/real-time/gfs-data/*
+        ln -sf {WPS_HOME}/ungrib/Variable_Tables/Vtable.GFS Vtable
+        {WPS_HOME}/ungrib.exe
+        rm GRIBFILE.*
+    """
+    # TODO: move gribfiles to own dir, but not supported by WPS, so after metgrid
