@@ -46,7 +46,7 @@ f90nml $WRF_RUNNER/namelist.wps namelist.wps
 f90nml -g geogrid -v opt_geogrid_tbl_path="'$WPS_HOME/geogrid/'" namelist.wps patched_nml && mv patched_nml namelist.wps
 f90nml -g metgrid -v opt_metgrid_tbl_path="'$WPS_HOME/metgrid'" namelist.wps patched_nml && mv patched_nml namelist.wps
 ln -sf $WPS_HOME/ungrib/Variable_Tables/Vtable.GFS Vtable
-ln -sf $WPS_HOME/geogrid/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
+ln -sf $WRF_RUNNER/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
 $WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/gfs-data/*"
 $WPS_HOME/geogrid.exe
 
