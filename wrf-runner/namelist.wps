@@ -6,24 +6,24 @@ end_date   = '2024-04-19_12:00:00','2024-04-19_12:00:00','2024-04-19_12:00:00','
 interval_seconds = 3600
 io_form_geogrid = 2,
 /
- 
+
 &geogrid
-parent_id         =   1,   1,  2, 3
-parent_grid_ratio =   1,   5,  5, 5
-i_parent_start    =   1,  48, 50, 55
-j_parent_start    =   1,  48, 51, 55
-e_we              =   120, 121, 121, 126
-e_sn              =   120, 121, 121, 126
-geog_data_res     =   'cglc_modis_lcz+default','cglc_modis_lcz+default','cglc_modis_lcz+default','cglc_modis_lcz+default'
+parent_id         = 1,     1,   2,    3,
+parent_grid_ratio = 1,     5,   5,    5,
+i_parent_start    = 1,    44,  51,   40,
+j_parent_start    = 1,    52,  48,   49,        
+e_we              = 120, 121, 121,  221,
+e_sn              = 120, 121, 121,  166, 
+geog_data_res = 'usgs_30s','usgs_30s','cglc_modis_lcz+default','cglc_modis_lcz+default'
 dx = 12500,
 dy = 12500,
-map_proj = 'lambert',
+map_proj =  'lambert',
 ref_lat   =  51.964716,
 ref_lon   =   5.663308,
 truelat1  =  30.0,
 truelat2  =  60.0,
-stand_lon = 4.55,
-geog_data_path = '/projects/0/prjs0914/wrf-data/default/static/WPS_GEOG'
+stand_lon = 6.,
+geog_data_path = '/projects/0/prjs0914/wrf-data/default/static/summerinthecity'
 /
  
 &ungrib
