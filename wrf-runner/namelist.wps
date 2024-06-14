@@ -1,9 +1,9 @@
 &share
 wrf_core = 'ARW',
 max_dom = 4,
-start_date = '2024-04-19_00:00:00','2024-04-19_00:00:00','2024-04-19_00:00:00','2024-04-19_00:00:00',
-end_date   = '2024-04-19_12:00:00','2024-04-19_12:00:00','2024-04-19_12:00:00','2024-04-19_12:00:00',
-interval_seconds = 3600
+start_date = '2019-07-23_06:00:00','2019-07-23_06:00:00','2019-07-23_06:00:00','2019-07-23_06:00:00'
+end_date   = '2019-07-25_18:00:00','2019-07-25_18:00:00','2019-07-25_18:00:00','2019-07-25_18:00:00'
+interval_seconds = 21600,
 io_form_geogrid = 2,
 /
 
@@ -14,7 +14,7 @@ i_parent_start    = 1,    44,  51,   40,
 j_parent_start    = 1,    52,  48,   49,        
 e_we              = 120, 121, 121,  221,
 e_sn              = 120, 121, 121,  166, 
-geog_data_res = 'usgs_30s','usgs_30s','cglc_modis_lcz+default','cglc_modis_lcz+default'
+geog_data_res = 'usgs_30s','usgs_30s','wur-landuse','wur-landuse'
 dx = 12500,
 dy = 12500,
 map_proj =  'lambert',
