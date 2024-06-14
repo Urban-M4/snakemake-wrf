@@ -50,13 +50,13 @@ ln -sf $WRF_RUNNER/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure th
 $WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/gfs-data/*"
 $WPS_HOME/geogrid.exe
 
-# Run W2W
-w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
-python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
-mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
-mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
-mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
-mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
+# # Run W2W
+# w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
+# python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
+# mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
+# mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
+# mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
+# mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
 
 # Continue with WPS
 $WPS_HOME/ungrib.exe
