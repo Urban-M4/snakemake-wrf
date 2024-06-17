@@ -22,7 +22,7 @@ ref_lat   =  51.964716,
 ref_lon   =   5.663308,
 truelat1  =  30.0,
 truelat2  =  60.0,
-stand_lon = 6.,
+stand_lon = 6.0,
 geog_data_path = '/projects/0/prjs0914/wrf-data/default/static/summerinthecity'
 /
  
@@ -35,3 +35,17 @@ prefix = 'FILE',
 fg_name = 'FILE'
 io_form_metgrid = 2,
 /
+
+&mod_levs
+ press_pa = 201300 , 200100 , 100000 ,
+             95000 ,  90000 ,
+             85000 ,  80000 ,
+             75000 ,  70000 ,
+             65000 ,  60000 ,
+             55000 ,  50000 ,
+             45000 ,  40000 ,
+             35000 ,  30000 ,
+             25000 ,  20000 ,
+             15000 ,  10000 ,
+              5000 ,   1000
+ /
