@@ -45,18 +45,18 @@ f90nml $WRF_RUNNER/namelist.wps namelist.wps
 # Run WPS
 f90nml -g geogrid -v opt_geogrid_tbl_path="'$WPS_HOME/geogrid/'" namelist.wps patched_nml && mv patched_nml namelist.wps
 f90nml -g metgrid -v opt_metgrid_tbl_path="'$WPS_HOME/metgrid'" namelist.wps patched_nml && mv patched_nml namelist.wps
-ln -sf $WPS_HOME/ungrib/Variable_Tables/Vtable.GFS Vtable
-ln -sf $WPS_HOME/geogrid/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
-$WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/gfs-data/*"
+ln -sf $WPS_HOME/ungrib/Variable_Tables/Vtable.ECMWF Vtable
+ln -sf $WRF_RUNNER/GEOGRID.TBL.ARW $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
+$WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/july2019/*"
 $WPS_HOME/geogrid.exe
 
-# Run W2W
-w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
-python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
-mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
-mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
-mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
-mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
+# # Run W2W
+# w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
+# python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
+# mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
+# mv $RUNDIR/geo_em.d02_61.nc $RUNDIR/geo_em.d02.nc
+# mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
+# mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
 
 # Continue with WPS
 $WPS_HOME/ungrib.exe
