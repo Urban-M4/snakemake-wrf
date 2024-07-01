@@ -22,6 +22,11 @@ export WRF_RUNNER=$HOME/Urban-M4/misc/wrf-runner
 export OUTPUT_DIR=$HOME/Urban-M4/experiments
 export DATA_HOME=/projects/0/prjs0914/wrf-data/default
 
+# Copy namelist for the setup you want to use
+cp namelist.wps_wur namelist.wps
+cp namelist.input_wur namelist.input
+
+
 # Create venv if it doesn't exist
 if test -d $WRF_RUNNER/venv; then
   source venv/bin/activate
