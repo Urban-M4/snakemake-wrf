@@ -16,8 +16,8 @@ rule GEOGRID:
     input: "namelist.wps", "GEOGRID.TBL"
     output: "finished.geogrid"
     shell:
-        f"""
-        {config['WPS_HOME']}/geogrid.exe
+        """
+        {config[WPS_HOME]}/geogrid.exe
         touch finished.geogrid
         """
 
@@ -25,7 +25,7 @@ rule W2W:
     input: "finished.geogrid"
     output: "finished.w2w"
     shell:
-        f"""
+        """
         w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
         mv geo_em.d01_61.nc geo_em.d01.nc
         mv geo_em.d02_61.nc geo_em.d02.nc
@@ -37,26 +37,26 @@ rule W2W:
 rule UNGRIB:
     input: "namelist.wps"
     output: "finished.ungrib"
-    shell: f"""
-
+    shell:
+        """
         # Remove old output if present (ungrib doesn't like to overwrite stuff)
         rm -f FILE*
 
         # Link vtable
-        cp {config['WPS_HOME']}/ungrib/Variable_Tables/Vtable.GFS Vtable
+        cp {config[WPS_HOME]}/ungrib/Variable_Tables/Vtable.GFS Vtable
 
         # Link gribfiles
-        {config['WPS_HOME']}/link_grib.csh {config['DATA_HOME']}/real-time/gfs-data/*
+        {config[WPS_HOME]}/link_grib.csh {config[DATA_HOME]}/real-time/gfs-data/*
 
         # Run ungrib
-        {config['WPS_HOME']}/ungrib.exe
+        {config[WPS_HOME]}/ungrib.exe
 
         # Scan logfile for errors and raise if necessary (ungrib can fail silently with 0 exit status)
         grep "ERROR" ungrib.log && echo "Aborting: ERROR in ungrib.log." && exit 1
 
         # Report ready
         touch finished.ungrib
-    """
+         """
 
 rule METGRID:
     input:
@@ -66,9 +66,9 @@ rule METGRID:
         "finished.w2w",  # TODO make conditional
     output: "finished.metgrid"
     shell:
-        f"""
-        cp {config['WPS_HOME']}/metgrid/METGRID.TBL.ARW METGRID.TBL
-        {config['WPS_HOME']}/metgrid.exe
+        """
+        cp {config[WPS_HOME]}/metgrid/METGRID.TBL.ARW METGRID.TBL
+        {config[WPS_HOME]}/metgrid.exe
 
         # Scan logfile for errors and raise if necessary (metgrid can fail silently with 0 exit status)
         grep "ERROR" metgrid.log && echo "Aborting: ERROR in metgrid.log. " && exit 1
@@ -80,8 +80,8 @@ rule REAL:
     input: "namelist.input", "finished.metgrid"
     output: "finished.real"
     shell:
-        f"""
-        {config['WRF_HOME']}/run/real.exe
+        """
+        {config[WRF_HOME]}/run/real.exe
         touch finished.real
         """
 
@@ -107,7 +107,7 @@ rule REORGANIZE_OUTPUT:
     input: "finished.wrf"
     output: "finished.clean"
     shell:
-        f"""
+        """
         mkdir -p output/geogrid
         mkdir -p output/ungrib
         mkdir -p output/metgrid
@@ -123,7 +123,6 @@ rule REORGANIZE_OUTPUT:
 
         # TODO: copy log files to separate folder?
         # Especially since real.exe logs are overwritten by wrf.exe (rsl.error.0000 and rsl.out.0000)
-
 
         touch finished.clean
         """

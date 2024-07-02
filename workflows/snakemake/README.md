@@ -55,12 +55,12 @@ snakemake --dag REORGANIZE_OUTPUT | dot -Tpng > dag.png
 
 
 # TODO's/ideas
-- Use snakemake [config](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html) for system paths
-- Use [peppy](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#configuring-scientific-experiments-via-peps) for executing multiple experiments?
-- Want to run with several sets of namelists / geogrid tables / input datasets
-- Make W2W conditional: https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution
-- Submit final wrf job to slurm
-- Auto-generated reports
-- Don't use F-strings! In shell blocks, omit the key names in config dict lookups. https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#standard-configuration
+- [x] Use snakemake [config](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html) for system paths
+- [ ] Use [peppy](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#configuring-scientific-experiments-via-peps) for executing multiple experiments?
+- [ ] Want to run with several sets of namelists / geogrid tables / input datasets
+- [ ] Make W2W conditional: https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution
+- [x] Submit final wrf job to slurm
+- [ ] Auto-generated reports?
+- [x] Don't use F-strings! In shell blocks, omit the key names in config dict lookups. https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#standard-configuration
 
 
