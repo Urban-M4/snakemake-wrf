@@ -3,26 +3,12 @@ workdir: "/home/pkalverla1/Urban-M4/experiments/snakemake"
 envvars:
     "NETCDF",
 
-rule ORGANIZE_OUTPUT:
-    input: "finished.wrf"
-    output: "finished.clean"
-    shell:
-        f"""
-        mkdir -p output/geogrid
-        mkdir -p output/ungrib
-        mkdir -p output/metgrid
-        mkdir -p output/real
-        mkdir -p output/wrf
+# All rules except WRF should be executed locally
+localrules: REORGANIZE_OUTPUT, CREATE_WORKDIR, GEOGRID, W2W, UNGRIB, METGRID, REAL
 
-        mv geo_em* output/geogrid
-        mv GRIBFILE.* output/ungrib
-        mv FILE* output/ungrib
-        mv met_em* output/metgrid
-        mv wrfbdy* wrfinput* output/real
-        mv wrfout* output/wrf
-
-        touch finished.clean
-        """
+rule DEFAULT:
+    # First rule is executed by default. It requires output of the last rule to be present.
+    input: "finished.clean"
 
 rule CREATE_WORKDIR:
     input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL"), workflow.source_path("namelist.input")
@@ -50,7 +36,6 @@ rule W2W:
         mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
         touch finished.w2w
         """
-
 
 rule UNGRIB:
     input: "namelist.wps"
@@ -107,16 +92,47 @@ rule REAL:
 rule WRF:
     input: "namelist.input", "finished.real"
     output: "finished.wrf"
+    resources:
+        slurm_partition="thin", # Request thin partition
+        runtime=60,             # In minutes(!). Up to one hour goes to fast queue
+        nodes=1,                # Number of nodes (one thin node has 128 cpu cores)
+        tasks=64,               # Number of tasks per node / number of patches in the domain - parallelized with MPI / DMPAR / multiprocessing
+        cpus_per_task=2,        # Number of CPU cores per task / number of tiles within each patch - parallelized with OpenMP / SMPAR / multithreading
+        mpi="mpiexec",
     shell:
-        f"""
-        # TODO link and unline after finishing?
-        cp {config['WRF_HOME']}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
-        cp {config['WRF_HOME']}/run/ozone* .
-        cp {config['WRF_HOME']}/run/RRTMG* .
-        cp {config['WRF_HOME']}/run/*.TBL .
+        """
+        export OMP_NUM_THREADS={resources.tasks}
 
-        {config['WRF_HOME']}/run/wrf.exe
+        # TODO link and unlink after finishing?
+        cp {config[WRF_HOME]}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
+        cp {config[WRF_HOME]}/run/ozone* .
+        cp {config[WRF_HOME]}/run/RRTMG* .
+        cp {config[WRF_HOME]}/run/*.TBL .
+
+        {resources.mpi} {config[WRF_HOME]}/run/wrf.exe
 
         touch finished.wrf
         """
+
+rule REORGANIZE_OUTPUT:
+    input: "finished.wrf"
+    output: "finished.clean"
+    shell:
+        f"""
+        mkdir -p output/geogrid
+        mkdir -p output/ungrib
+        mkdir -p output/metgrid
+        mkdir -p output/real
+        mkdir -p output/wrf
+
+        mv geo_em* output/geogrid
+        mv GRIBFILE.* output/ungrib
+        mv FILE* output/ungrib
+        mv met_em* output/metgrid
+        mv wrfbdy* wrfinput* output/real
+        mv wrfout* output/wrf
+
+        touch finished.clean
+        """
+
 

@@ -10,6 +10,7 @@ source ~/.bashrc
 micromamba create --name snakemake python=3.11 "numpy<2" bioconda::snakemake -y
 micromamba activate snakemake
 pip install git+https://github.com/matthiasdemuzere/w2w@add_wrf_version
+pip install snakemake-executor-plugin-slurm
 
 # Run snakefile in this dir
 snakemake --dryrun  # just see if it looks okay
@@ -20,9 +21,9 @@ snakemake --cores 1 REAL  # only execute up to and including REAL
 # https://github.com/snakemake/snakemake/issues/312
 alias snakemake="snakemake --cores 1"
 
-# Visualize DAG
-snakemake --dag | dot -Tsvg > dag.svg
-snakemake --dag | dot -Tpng > dag.png
+# Visualize DAG using graphviz
+snakemake --dag REORGANIZE_OUTPUT | dot -Tsvg > dag.svg
+snakemake --dag REORGANIZE_OUTPUT | dot -Tpng > dag.png
 ```
 
 
@@ -56,6 +57,6 @@ snakemake --dag | dot -Tpng > dag.png
 - Make W2W conditional: https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution
 - Submit final wrf job to slurm
 - Auto-generated reports
-
+- Don't use F-strings! In shell blocks, omit the key names in config dict lookups. https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#standard-configuration
 
 
