@@ -3,13 +3,8 @@ workdir: "/home/pkalverla1/Urban-M4/experiments/snakemake"
 envvars:
     "NETCDF",
 
-
-DOMAINS = ['d01', 'd02', 'd03', 'd04']
-TIMES = range(13)  # TODO: include dates, make more flexible?
-
 rule all:
-    input:
-        expand("wrfout_{d}_2024-04-19_00:00:00", d=DOMAINS)
+    input: "finished.wrf"
 
 rule CREATE_WORKDIR:
     input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL"), workflow.source_path("namelist.input")
@@ -18,16 +13,17 @@ rule CREATE_WORKDIR:
 
 rule GEOGRID:
     input: "namelist.wps", "GEOGRID.TBL"
-    output: expand("output/geogrid/geo_em.{domain}.nc", domain=DOMAINS)
+    output: "finished.geogrid"
     shell:
         f"""
         mkdir -p output/geogrid
         {config['WPS_HOME']}/geogrid.exe
+        touch finished.geogrid
         """
 
 rule W2W:
-    input: rules.GEOGRID.output
-    log: "w2w.log"
+    input: "finished.geogrid"
+    output: "finished.w2w"
     shell:
         f"""
         cd output/geogrid
@@ -36,29 +32,31 @@ rule W2W:
         mv geo_em.d02_61.nc geo_em.d02.nc
         mv geo_em.d03_61.nc geo_em.d03.nc
         mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
+        touch ../../finished.w2w
         """
 
 
 rule UNGRIB:
     input: "namelist.wps"
-    output: [f"FILE:2024-04-19_{t:02d}" for t in TIMES]
+    output: "finished.ungrib"
     shell: f"""
         {config['WPS_HOME']}/link_grib.csh {config['DATA_HOME']}/real-time/gfs-data/*
         cp {config['WPS_HOME']}/ungrib/Variable_Tables/Vtable.GFS Vtable
         {config['WPS_HOME']}/ungrib.exe
         rm GRIBFILE.*
 
+        # TODO: scan logfile for error
+        touch finished.ungrib
     """
     # TODO: move gribfiles to own dir, but not supported by WPS, so after metgrid
 
 rule METGRID:
     input:
         "namelist.wps",
-        rules.UNGRIB.output,
-        rules.GEOGRID.output,
-        rules.W2W.log,
-    output:
-        expand("output/metgrid/met_em.{d}.2024-04-19_{t:02d}:00:00.nc", d=DOMAINS, t=TIMES)
+        "finished.ungrib",
+        "finished.geogrid",
+        "finished.w2w",  # TODO make conditional
+    output: "finished.metgrid"
     shell:
         f"""
         mkdir -p output/metgrid
@@ -68,28 +66,25 @@ rule METGRID:
         # Cleanup ungrib stuff
         mkdir -p output/ungrib
         mv FILE* output/ungrib
+
+        # TODO: scan logfile for error
+        touch finished.metgrid
         """
 
 rule REAL:
-    input:
-        "namelist.input",
-        rules.METGRID.output,
-    output:
-        expand("wrfinput_{d}", d=DOMAINS),
-        "wrfbdy_d01"
+    input: "namelist.input", "finished.metgrid"
+    output: "finished.real"
     shell:
         f"""
         ln -srf /output/metgrid/* .
         {config['WRF_HOME']}/run/real.exe
         rm met_em*
+        touch finished.real
         """
 
 rule WRF:
-    input:
-        "namelist.input",
-        rules.REAL.output,
-    output:
-        expand("wrfout_{d}_2024-04-19_00:00:00", d=DOMAINS)
+    input: "namelist.input", "finished.real"
+    output: "finished.wrf"
     shell:
         f"""
         cp {config['WRF_HOME']}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
@@ -97,7 +92,7 @@ rule WRF:
         cp {config['WRF_HOME']}/run/RRTMG* .
         cp {config['WRF_HOME']}/run/*.TBL .
         {config['WRF_HOME']}/run/wrf.exe
-        rm
+        touch finished.wrf
         """
 
 
