@@ -1,0 +1,3 @@
+WPS_HOME: ~/wrf-model/WPS
+WRF_HOME: ~/wrf-model/WRF
+DATA_HOME: /projects/0/prjs0914/wrf-data/default
