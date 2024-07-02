@@ -5,7 +5,6 @@ start_date = '2024-04-19_00:00:00','2024-04-19_00:00:00','2024-04-19_00:00:00','
 end_date   = '2024-04-19_12:00:00','2024-04-19_12:00:00','2024-04-19_12:00:00','2024-04-19_12:00:00',
 interval_seconds = 3600
 io_form_geogrid = 2,
-opt_output_from_geogrid_path = './output/geogrid',
 /
 
 &geogrid
@@ -36,6 +35,5 @@ prefix = 'FILE',
 &metgrid
 fg_name = 'FILE'
 io_form_metgrid = 2,
-opt_output_from_metgrid_path = './output/metgrid',
 opt_metgrid_tbl_path = '.'
 /

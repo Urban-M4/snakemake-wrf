@@ -3,8 +3,26 @@ workdir: "/home/pkalverla1/Urban-M4/experiments/snakemake"
 envvars:
     "NETCDF",
 
-rule all:
+rule ORGANIZE_OUTPUT:
     input: "finished.wrf"
+    output: "finished.clean"
+    shell:
+        f"""
+        mkdir -p output/geogrid
+        mkdir -p output/ungrib
+        mkdir -p output/metgrid
+        mkdir -p output/real
+        mkdir -p output/wrf
+
+        mv geo_em* output/geogrid
+        mv GRIBFILE.* output/ungrib
+        mv FILE* output/ungrib
+        mv met_em* output/metgrid
+        mv wrfbdy* wrfinput* output/real
+        mv wrfout* output/wrf
+
+        touch finished.clean
+        """
 
 rule CREATE_WORKDIR:
     input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL"), workflow.source_path("namelist.input")
@@ -16,7 +34,6 @@ rule GEOGRID:
     output: "finished.geogrid"
     shell:
         f"""
-        mkdir -p output/geogrid
         {config['WPS_HOME']}/geogrid.exe
         touch finished.geogrid
         """
@@ -26,13 +43,12 @@ rule W2W:
     output: "finished.w2w"
     shell:
         f"""
-        cd output/geogrid
         w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
         mv geo_em.d01_61.nc geo_em.d01.nc
         mv geo_em.d02_61.nc geo_em.d02.nc
         mv geo_em.d03_61.nc geo_em.d03.nc
         mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
-        touch ../../finished.w2w
+        touch finished.w2w
         """
 
 
@@ -40,15 +56,25 @@ rule UNGRIB:
     input: "namelist.wps"
     output: "finished.ungrib"
     shell: f"""
-        {config['WPS_HOME']}/link_grib.csh {config['DATA_HOME']}/real-time/gfs-data/*
-        cp {config['WPS_HOME']}/ungrib/Variable_Tables/Vtable.GFS Vtable
-        {config['WPS_HOME']}/ungrib.exe
-        rm GRIBFILE.*
 
-        # TODO: scan logfile for error
+        # Remove old output if present (ungrib doesn't like to overwrite stuff)
+        rm -f FILE*
+
+        # Link vtable
+        cp {config['WPS_HOME']}/ungrib/Variable_Tables/Vtable.GFS Vtable
+
+        # Link gribfiles
+        {config['WPS_HOME']}/link_grib.csh {config['DATA_HOME']}/real-time/gfs-data/*
+
+        # Run ungrib
+        {config['WPS_HOME']}/ungrib.exe
+
+        # Scan logfile for errors and raise if necessary (ungrib can fail silently with 0 exit status)
+        grep "ERROR" ungrib.log && echo "Aborting: ERROR in ungrib.log." && exit 1
+
+        # Report ready
         touch finished.ungrib
     """
-    # TODO: move gribfiles to own dir, but not supported by WPS, so after metgrid
 
 rule METGRID:
     input:
@@ -63,11 +89,9 @@ rule METGRID:
         cp {config['WPS_HOME']}/metgrid/METGRID.TBL.ARW METGRID.TBL
         {config['WPS_HOME']}/metgrid.exe
 
-        # Cleanup ungrib stuff
-        mkdir -p output/ungrib
-        mv FILE* output/ungrib
+        # Scan logfile for errors and raise if necessary (metgrid can fail silently with 0 exit status)
+        grep "ERROR" metgrid.log && echo "Aborting: ERROR in metgrid.log. " && exit 1
 
-        # TODO: scan logfile for error
         touch finished.metgrid
         """
 
@@ -76,9 +100,7 @@ rule REAL:
     output: "finished.real"
     shell:
         f"""
-        ln -srf /output/metgrid/* .
         {config['WRF_HOME']}/run/real.exe
-        rm met_em*
         touch finished.real
         """
 
@@ -87,12 +109,14 @@ rule WRF:
     output: "finished.wrf"
     shell:
         f"""
+        # TODO link and unline after finishing?
         cp {config['WRF_HOME']}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
         cp {config['WRF_HOME']}/run/ozone* .
         cp {config['WRF_HOME']}/run/RRTMG* .
         cp {config['WRF_HOME']}/run/*.TBL .
+
         {config['WRF_HOME']}/run/wrf.exe
+
         touch finished.wrf
         """
-
 

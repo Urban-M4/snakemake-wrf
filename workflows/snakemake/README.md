@@ -14,6 +14,15 @@ pip install git+https://github.com/matthiasdemuzere/w2w@add_wrf_version
 # Run snakefile in this dir
 snakemake --dryrun  # just see if it looks okay
 snakemake --cores 1  # execute on 1 core
+snakemake --cores 1 REAL  # only execute up to and including REAL
+
+# Potentially set up alias for snakemake to circumvent annoying design decision.
+# https://github.com/snakemake/snakemake/issues/312
+alias snakemake="snakemake --cores 1"
+
+# Visualize DAG
+snakemake --dag | dot -Tsvg > dag.svg
+snakemake --dag | dot -Tpng > dag.png
 ```
 
 
@@ -21,6 +30,7 @@ snakemake --cores 1  # execute on 1 core
 
 - Snakemake wants to run with relative dirs for portability.
 - Will need some trickery to get timestamped output dirs
+- use alias to set default cores?
 - WRF very annoying with assumptions about files being present in certain dirs:
     - geogrid output dir *IS* configurable in namelist.wps
     - ungrib output dir *NOT* configurable in namelist.wps
@@ -36,10 +46,16 @@ snakemake --cores 1  # execute on 1 core
     - Option 4: write some python functions to parse the namelist and predict the files
 - ungrib and metgrid fail with 0 exit status. https://github.com/wrf-model/WPS/issues/252
     - Read the logfile and scan for error
-- Want to run with several sets of namelists / geogrid tables / input datasets
+- ungrib doesn't overwrite existing FILE, instead raises "Fortran runtime error: Cannot open file ... file exists."
+
+
+# TODO's/ideas
 - Use snakemake [config](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html) for system paths
 - Use [peppy](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#configuring-scientific-experiments-via-peps) for executing multiple experiments?
+- Want to run with several sets of namelists / geogrid tables / input datasets
+- Make W2W conditional: https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#data-dependent-conditional-execution
 - Submit final wrf job to slurm
+- Auto-generated reports
 
 
 
