@@ -10,7 +10,11 @@ source ~/.bashrc
 micromamba create --name snakemake python=3.11 "numpy<2" bioconda::snakemake -y
 micromamba activate snakemake
 pip install git+https://github.com/matthiasdemuzere/w2w@add_wrf_version
-pip install snakemake-executor-plugin-slurm
+
+# Make sure netcdf is available for WPS and WRF (these instructions are specific to Snellius)
+module load 2023
+module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
+export NETCDF=$(nf-config --prefix)
 
 # Run snakefile in this dir
 snakemake --dryrun  # just see if it looks okay
