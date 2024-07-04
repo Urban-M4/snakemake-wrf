@@ -14,7 +14,7 @@ i_parent_start    = 1,    44,  51,   40,
 j_parent_start    = 1,    52,  48,   49,        
 e_we              = 120, 121, 121,  221,
 e_sn              = 120, 121, 121,  166, 
-geog_data_res = 'usgs_30s','usgs_30s','usgs_30s','usgs_30s'
+geog_data_res     = 'cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s'
 dx = 12500,
 dy = 12500,
 map_proj =  'lambert',
@@ -23,7 +23,7 @@ ref_lon   =   5.663308,
 truelat1  =  30.0,
 truelat2  =  60.0,
 stand_lon = 6.0,
-geog_data_path = '/projects/0/prjs0914/wrf-data/default/static/summerinthecity'
+geog_data_path = '/projects/0/prjs0914/wrf-data/default/static/WPS_GEOG'
 /
  
 &ungrib
