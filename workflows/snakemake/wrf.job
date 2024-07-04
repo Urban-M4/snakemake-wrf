@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --job-name=wrf_experiment     # Job name
+#SBATCH --partition=thin              # Request thin partition. Up to one hour goes to fast queue
+#SBATCH --time=1:00:00                # Maximum runtime (D-HH:MM:SS)
+#SBATCH --nodes=1                     # Number of nodes (one thin node has 128 cpu cores)
+#SBATCH --ntasks=64                   # Number of tasks per node / number of patches in the domain - parallelized with MPI / DMPAR / multiprocessing
+#SBATCH --cpus-per-task=2             # Number of CPU cores per task / number of tiles within each patch - parallelized with OpenMP / SMPAR / multithreading
+#SBATCH --wait
+
+# Note: number cpus-per-task * ntasks should not exceed the total available cores on requested nodes
+# 8*16 = 128 exactly fits on one thin node.
+
+# Each process can do multithreading but limited to the number of cpu cores allocated to each process
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+
+# From WRF/run, submit as
+#   sbatch wrf.job
+#
+# or, from any other directory, submit as
+#   sbatch wrf.job /path/to/wrf.exe
+wrf_executable="${1:-wrf.exe}"
+
+# Load dependencies
+module load 2023
+module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
+export NETCDF=$(nf-config --prefix)
+
+mpiexec $wrf_executable

@@ -1,0 +1,131 @@
+configfile: "./config.yaml"
+workdir: config["output_directory"]
+
+envvars:
+    "NETCDF",
+
+rule DEFAULT:
+    # First rule is executed by default. It requires output of the last rule to be present.
+    input: "finished.clean"
+
+rule CREATE_WORKDIR:
+    input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL"), workflow.source_path("namelist.input"), workflow.source_path("wrf.job")
+    output: "namelist.wps", "GEOGRID.TBL", "namelist.input"
+    shell: "cp {input} ."
+
+rule GEOGRID:
+    input: "namelist.wps", "GEOGRID.TBL"
+    output: "finished.geogrid"
+    shell:
+        """
+        {config[wps_home]}/geogrid.exe
+        touch finished.geogrid
+        """
+
+rule W2W:
+    input: "finished.geogrid"
+    output: "finished.w2w"
+    shell:
+        """
+        w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
+        mv geo_em.d01_61.nc geo_em.d01.nc
+        mv geo_em.d02_61.nc geo_em.d02.nc
+        mv geo_em.d03_61.nc geo_em.d03.nc
+        mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
+        touch finished.w2w
+        """
+
+rule UNGRIB:
+    input: "namelist.wps"
+    output: "finished.ungrib"
+    shell:
+        """
+        # Remove old output if present (ungrib doesn't like to overwrite stuff)
+        rm -f FILE*
+
+        # Link vtable
+        cp {config[wps_home]}/ungrib/Variable_Tables/Vtable.GFS Vtable
+
+        # Link gribfiles
+        {config[wps_home]}/link_grib.csh {config[data_home]}/real-time/gfs-data/*
+
+        # Run ungrib
+        {config[wps_home]}/ungrib.exe
+
+        # Scan logfile for errors and raise if necessary (ungrib can fail silently with 0 exit status)
+        grep "ERROR" ungrib.log && echo "Aborting: ERROR in ungrib.log." && exit 1
+
+        # Report ready
+        touch finished.ungrib
+         """
+
+rule METGRID:
+    input:
+        "namelist.wps",
+        "finished.ungrib",
+        "finished.geogrid",
+        "finished.w2w",  # TODO make conditional
+    output: "finished.metgrid"
+    shell:
+        """
+        cp {config[wps_home]}/metgrid/METGRID.TBL.ARW METGRID.TBL
+        {config[wps_home]}/metgrid.exe
+
+        # Scan logfile for errors and raise if necessary (metgrid can fail silently with 0 exit status)
+        grep "ERROR" metgrid.log && echo "Aborting: ERROR in metgrid.log. " && exit 1
+
+        touch finished.metgrid
+        """
+
+rule REAL:
+    input: "namelist.input", "finished.metgrid"
+    output: "finished.real"
+    shell:
+        """
+        {config[wrf_home]}/run/real.exe
+        touch finished.real
+        """
+
+rule WRF:
+    input: "namelist.input", "finished.real"
+    output: "finished.wrf"
+    shell:
+        """
+        # TODO link instead of cp and unlink after finishing?
+        cp -f {config[wrf_home]}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
+        cp -f {config[wrf_home]}/run/ozone* .
+        cp -f {config[wrf_home]}/run/RRTMG* .
+        cp -f {config[wrf_home]}/run/*.TBL .
+
+        # Submit wrf job to SLURM and wait for it to finish
+        sbatch --wait wrf.job {config[wrf_home]}/run/wrf.exe
+
+        # Report status
+        touch finished.wrf
+        """
+
+rule REORGANIZE_OUTPUT:
+    input: "finished.wrf"
+    output: "finished.clean"
+    shell:
+        """
+        mkdir -p output/geogrid
+        mkdir -p output/ungrib
+        mkdir -p output/metgrid
+        mkdir -p output/real
+        mkdir -p output/wrf
+
+        mv geo_em* output/geogrid
+        mv GRIBFILE.* output/ungrib
+        mv FILE* output/ungrib
+        mv met_em* output/metgrid
+        mv wrfbdy* wrfinput* output/real
+        mv wrfout* output/wrf
+
+        # TODO: copy log files to separate folder?
+        # Especially since real.exe logs are overwritten by wrf.exe (rsl.error.0000 and rsl.out.0000)
+
+        touch finished.clean
+        """
+
+

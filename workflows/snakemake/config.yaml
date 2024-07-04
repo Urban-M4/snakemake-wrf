@@ -1,0 +1,4 @@
+wps_home: ~/wrf-model/WPS
+wrf_home: ~/wrf-model/WRF
+data_home: /projects/0/prjs0914/wrf-data/default
+output_directory: "./default"
