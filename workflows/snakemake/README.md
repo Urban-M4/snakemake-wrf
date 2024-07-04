@@ -62,5 +62,5 @@ snakemake --dag REORGANIZE_OUTPUT | dot -Tpng > dag.png
 - [x] Submit final wrf job to slurm
 - [ ] Auto-generated reports?
 - [x] Don't use F-strings! In shell blocks, omit the key names in config dict lookups. https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#standard-configuration
-
+- [ ] Gitignore output from snakemake
 
