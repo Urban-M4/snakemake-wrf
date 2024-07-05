@@ -1,4 +1,23 @@
 wps_home: ~/wrf-model/WPS
 wrf_home: ~/wrf-model/WRF
 data_home: /projects/0/prjs0914/wrf-data/default
-output_directory: "./default"
+
+experiments:
+  usgs:
+    geog_data_res: "'usgs_30s','usgs_30s','usgs_30s','usgs_30s'"
+    geog_data_path: '/projects/0/prjs0914/wrf-data/default/static/summerinthecity'
+    geogrid_table: GEOGRID.TBL.ARW_USGS
+    run_w2w: true
+    num_land_cat: 24
+  modis_lcz:
+    geog_data_res: "'cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s'"
+    geog_data_path: '/projects/0/prjs0914/wrf-data/default/static/WPS_GEOG'
+    geogrid_table: GEOGRID.TBL.ARW_LCZ
+    run_w2w: true
+    num_land_cat: 61
+  wur:
+    geog_data_res: "'usgs_30s','usgs_30s','wur-landuse','wur-landuse'"
+    geog_data_path: '/projects/0/prjs0914/wrf-data/default/static/summerinthecity'
+    geogrid_table: GEOGRID.TBL.ARW_WUR
+    run_w2w: true
+    num_land_cat: 24
