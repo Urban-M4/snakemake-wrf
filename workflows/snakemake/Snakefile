@@ -6,19 +6,40 @@ rule ALL_EXPERIMENTS:
 
 rule CREATE_WORKDIR:
     input:
-        workflow.source_path("namelist.wps"),
-        workflow.source_path("GEOGRID.TBL"),
-        workflow.source_path("namelist.input"),
-        workflow.source_path("wrf.job")
+        namelist_wps = workflow.source_path("namelist.wps"),
+        namelist_input = workflow.source_path("namelist.input"),
+        wrf_job = workflow.source_path("wrf.job")
     output:
         "{experiment}/namelist.wps",
         "{experiment}/GEOGRID.TBL",
         "{experiment}/namelist.input"
+    params:
+        # experiment = lambda wildcards: config['experiments'][wildcards.experiment],
+        geogrid_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
+        geog_data_path = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_path'],
+        num_land_cat = lambda wildcards: config['experiments'][wildcards.experiment]['num_land_cat'],
+        geogrid_table = lambda wildcards: workflow.source_path(config['experiments'][wildcards.experiment]['geogrid_table']),
     shell:
         """
+        mkdir -p {wildcards.experiment}
         cd {wildcards.experiment}
-        && cp {input} .
+        cp {input.wrf_job} .
+        cp {params.geogrid_table} GEOGRID.TBL
+
+        # Read source namelist.wps with f90nml, make some changes, and save in work dir
+        f90nml \
+            -g geogrid \
+            -v geogrid_data_res={params.geogrid_data_res} \
+            -v geog_data_path={params.geog_data_path} \
+            {input.namelist_wps} namelist.wps
+
+        # Read source namelist.input, make some changes, and save in work dir
+        f90nml \
+            -g physics \
+            -v num_land_cat={params.num_land_cat} \
+            {input.namelist_input} namelist.input
         """
+
 
 rule GEOGRID:
     input:
@@ -50,8 +71,10 @@ rule W2W:
         """
 
 rule UNGRIB:
-    input: "{experiment}/namelist.wps"
-    output: "{experiment}/finished.ungrib"
+    input:
+        "{experiment}/namelist.wps"
+    output:
+        "{experiment}/finished.ungrib"
     shell:
         """
         cd {wildcards.experiment}
