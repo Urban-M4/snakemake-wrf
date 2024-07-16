@@ -15,7 +15,7 @@ rule CREATE_WORKDIR:
         "{experiment}/namelist.input"
     params:
         # experiment = lambda wildcards: config['experiments'][wildcards.experiment],
-        geogrid_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
+        geog_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
         geog_data_path = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_path'],
         num_land_cat = lambda wildcards: config['experiments'][wildcards.experiment]['num_land_cat'],
         geogrid_table = lambda wildcards: workflow.source_path(config['experiments'][wildcards.experiment]['geogrid_table']),
@@ -29,8 +29,12 @@ rule CREATE_WORKDIR:
         # Read source namelist.wps with f90nml, make some changes, and save in work dir
         f90nml \
             -g geogrid \
-            -v geogrid_data_res={params.geogrid_data_res} \
             -v geog_data_path={params.geog_data_path} \
+            {input.namelist_wps} namelist.wps
+
+        f90nml \
+            -g geogrid \
+            -v geog_data_res={params.geog_data_res} \
             {input.namelist_wps} namelist.wps
 
         # Read source namelist.input, make some changes, and save in work dir
@@ -44,13 +48,19 @@ rule CREATE_WORKDIR:
 rule GEOGRID:
     input:
         "{experiment}/namelist.wps",
-        "{experiment}/GEOGRID.TBL"
+        geogrid = "{experiment}/GEOGRID.TBL"
     output:
         "{experiment}/finished.geogrid"
     shell:
         """
         cd {wildcards.experiment}
+
+        ln -sf {input.geogrid} {config[wps_home]}
         {config[wps_home]}/geogrid.exe
+
+        # Scan logfile for errors and raise if necessary (geogrid can fail silently with 0 exit status)
+        grep "ERROR" geogrid.log && echo "Aborting: ERROR in geogrid.log." && exit 1
+
         touch finished.geogrid
         """
 
@@ -83,10 +93,10 @@ rule UNGRIB:
         rm -f FILE*
 
         # Link vtable
-        cp {config[wps_home]}/ungrib/Variable_Tables/Vtable.GFS Vtable
+        cp {config[wps_home]}/ungrib/Variable_Tables/Vtable.ECMWF Vtable
 
         # Link gribfiles
-        {config[wps_home]}/link_grib.csh {config[data_home]}/real-time/gfs-data/*
+        {config[wps_home]}/link_grib.csh {config[data_home]}/real-time/july2019/*
 
         # Run ungrib
         {config[wps_home]}/ungrib.exe
