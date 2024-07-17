@@ -69,16 +69,24 @@ rule W2W:
         "{experiment}/finished.geogrid"
     output:
         "{experiment}/finished.w2w"
-    shell:
-        """
-        cd {wildcards.experiment}
-        w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
-        mv geo_em.d01_61.nc geo_em.d01.nc
-        mv geo_em.d02_61.nc geo_em.d02.nc
-        mv geo_em.d03_61.nc geo_em.d03.nc
-        mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
-        touch finished.w2w
-        """
+    run:
+        if config['experiments'][wildcards.experiment]["run_w2w"] == "true":
+            shell(
+                """
+                cd {wildcards.experiment}
+                w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
+                # mv geo_em.d01_61.nc geo_em.d01.nc
+                # mv geo_em.d02_61.nc geo_em.d02.nc
+                # mv geo_em.d03_61.nc geo_em.d03.nc
+                # mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
+                touch finished.w2w
+                """)
+        else:
+            shell(
+                """
+                cd {wildcards.experiment}
+                touch finished.w2w
+                """)
 
 rule UNGRIB:
     input:
