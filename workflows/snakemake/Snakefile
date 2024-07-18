@@ -1,6 +1,9 @@
 configfile: workflow.source_path("config.yaml")
 envvars: "NETCDF"
 
+import f90nml
+from pathlib import Path
+
 rule ALL_EXPERIMENTS:
     input: expand("{experiment}/finished.clean", experiment=config["experiments"].keys())
 
@@ -26,26 +29,24 @@ rule UPDATE_NAMELISTS:
     output:
         "{experiment}/namelist.wps",
         "{experiment}/namelist.input"
-    params:
-        geog_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
-        geog_data_path = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_path'],
-        num_land_cat = lambda wildcards: config['experiments'][wildcards.experiment]['num_land_cat'],
-    shell:
-        """
-        cd {wildcards.experiment}
+    run:
+        geog_data_res = config['experiments'][wildcards.experiment]['geog_data_res']
+        geog_data_path = config['experiments'][wildcards.experiment]['geog_data_path']
+        num_land_cat = config['experiments'][wildcards.experiment]['num_land_cat']
+
         # Read source namelist.wps with f90nml, make some changes, and save in work dir
-        f90nml \
-            -g geogrid \
-            -v geog_data_res={params.geog_data_res} \
-            -v geog_data_path={params.geog_data_path} \
-            {input.namelist_wps} namelist.wps
+        wps_path = Path(wildcards.experiment, "namelist.wps")
+        nml = f90nml.read(input.namelist_wps)
+        nml["geogrid"]["geog_data_path"] = geog_data_path
+        nml["geogrid"]["geog_data_res"] = geog_data_res
+        nml.write(wps_path)
 
         # Read source namelist.input, make some changes, and save in work dir
-        f90nml \
-            -g physics \
-            -v num_land_cat={params.num_land_cat} \
-            {input.namelist_input} namelist.input
-        """
+        input_path = Path(wildcards.experiment, "namelist.input")
+        nml_input = f90nml.read(input.namelist_input)
+        nml_input["physics"]["num_land_cat"] = num_land_cat
+        nml_input.write(input_path)
+
 
 rule GEOGRID:
     input:
