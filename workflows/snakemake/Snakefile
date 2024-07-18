@@ -6,18 +6,10 @@ rule ALL_EXPERIMENTS:
 
 rule CREATE_WORKDIR:
     input:
-        namelist_wps = workflow.source_path("namelist.wps"),
-        namelist_input = workflow.source_path("namelist.input"),
         wrf_job = workflow.source_path("wrf.job")
     output:
-        "{experiment}/namelist.wps",
         "{experiment}/GEOGRID.TBL",
-        "{experiment}/namelist.input"
     params:
-        # experiment = lambda wildcards: config['experiments'][wildcards.experiment],
-        geog_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
-        geog_data_path = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_path'],
-        num_land_cat = lambda wildcards: config['experiments'][wildcards.experiment]['num_land_cat'],
         geogrid_table = lambda wildcards: workflow.source_path(config['experiments'][wildcards.experiment]['geogrid_table']),
     shell:
         """
@@ -25,16 +17,27 @@ rule CREATE_WORKDIR:
         cd {wildcards.experiment}
         cp {input.wrf_job} .
         cp {params.geogrid_table} GEOGRID.TBL
+        """
 
+rule UPDATE_NAMELISTS:
+    input:
+        namelist_wps = workflow.source_path("namelist.wps"),
+        namelist_input = workflow.source_path("namelist.input"),
+    output:
+        "{experiment}/namelist.wps",
+        "{experiment}/namelist.input"
+    params:
+        geog_data_res = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_res'],
+        geog_data_path = lambda wildcards: config['experiments'][wildcards.experiment]['geog_data_path'],
+        num_land_cat = lambda wildcards: config['experiments'][wildcards.experiment]['num_land_cat'],
+    shell:
+        """
+        cd {wildcards.experiment}
         # Read source namelist.wps with f90nml, make some changes, and save in work dir
         f90nml \
             -g geogrid \
-            -v geog_data_path={params.geog_data_path} \
-            {input.namelist_wps} namelist.wps
-
-        f90nml \
-            -g geogrid \
             -v geog_data_res={params.geog_data_res} \
+            -v geog_data_path={params.geog_data_path} \
             {input.namelist_wps} namelist.wps
 
         # Read source namelist.input, make some changes, and save in work dir
@@ -43,7 +46,6 @@ rule CREATE_WORKDIR:
             -v num_land_cat={params.num_land_cat} \
             {input.namelist_input} namelist.input
         """
-
 
 rule GEOGRID:
     input:
@@ -70,7 +72,7 @@ rule W2W:
     output:
         "{experiment}/finished.w2w"
     run:
-        if config['experiments'][wildcards.experiment]["run_w2w"] == "true":
+        if config['experiments'][wildcards.experiment]["run_w2w"]:
             shell(
                 """
                 cd {wildcards.experiment}
