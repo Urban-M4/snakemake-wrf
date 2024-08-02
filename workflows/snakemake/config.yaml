@@ -21,3 +21,9 @@ experiments:
     geogrid_table: GEOGRID.TBL.ARW_WUR
     use_wudapt_lcz: false
     num_land_cat: 24
+  wur_lcz:
+    geog_data_res: ['cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s','cglc_modis_lcz+30s']
+    geog_data_path: '/projects/0/prjs0914/wrf-data/default/static/WPS_GEOG'
+    geogrid_table: GEOGRID.TBL.ARW_LCZ_WUR
+    use_wudapt_lcz: true
+    num_land_cat: 61
