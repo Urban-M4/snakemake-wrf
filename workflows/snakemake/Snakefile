@@ -33,7 +33,7 @@ rule UPDATE_NAMELISTS:
         geog_data_res = config['experiments'][wildcards.experiment]['geog_data_res']
         geog_data_path = config['experiments'][wildcards.experiment]['geog_data_path']
         num_land_cat = config['experiments'][wildcards.experiment]['num_land_cat']
-        run_w2w = config['experiments'][wildcards.experiment]["run_w2w"]
+        use_wudapt_lcz = config['experiments'][wildcards.experiment]["use_wudapt_lcz"]
 
         # Read source namelist.wps with f90nml, make some changes, and save in work dir
         wps_path = Path(wildcards.experiment, "namelist.wps")
@@ -46,7 +46,7 @@ rule UPDATE_NAMELISTS:
         input_path = Path(wildcards.experiment, "namelist.input")
         nml_input = f90nml.read(input.namelist_input)
         nml_input["physics"]["num_land_cat"] = num_land_cat
-        nml_input["physics"]["use_wudapt_lcz"] = 1 if run_w2w else 0
+        nml_input["physics"]["use_wudapt_lcz"] = 1 if use_wudapt_lcz else 0
         nml_input.write(input_path)
 
 
@@ -69,29 +69,6 @@ rule GEOGRID:
         touch finished.geogrid
         """
 
-rule W2W:
-    input:
-        "{experiment}/finished.geogrid"
-    output:
-        "{experiment}/finished.w2w"
-    run:
-        if config['experiments'][wildcards.experiment]["run_w2w"]:
-            shell(
-                """
-                cd {wildcards.experiment}
-                w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
-                # mv geo_em.d01_61.nc geo_em.d01.nc
-                # mv geo_em.d02_61.nc geo_em.d02.nc
-                # mv geo_em.d03_61.nc geo_em.d03.nc
-                # mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
-                touch finished.w2w
-                """)
-        else:
-            shell(
-                """
-                cd {wildcards.experiment}
-                touch finished.w2w
-                """)
 
 rule UNGRIB:
     input:
@@ -126,7 +103,6 @@ rule METGRID:
         "{experiment}/namelist.wps",
         "{experiment}/finished.ungrib",
         "{experiment}/finished.geogrid",
-        "{experiment}/finished.w2w",  # TODO make conditional
     output: "{experiment}/finished.metgrid"
     shell:
         """
