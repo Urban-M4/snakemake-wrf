@@ -1,14 +1,13 @@
 # Snakemake
 
 ```
-# Install micromamba on snellius
-"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-# During install, set conda-forge as default channel
-source ~/.bashrc
+# Configure mamba (first time only)
+module load Mamba/23.1.0-4
+mamba init
 
 # Create environment (pin 3.11 for ecmwflibs dependency of w2w)
-micromamba create --name snakemake python=3.11 "numpy<2" bioconda::snakemake -y
-micromamba activate snakemake
+mamba create --name snakemake python=3.11 "numpy<2" bioconda::snakemake -y
+mamba activate snakemake
 pip install git+https://github.com/matthiasdemuzere/w2w@add_wrf_version
 
 # Make sure netcdf is available for WPS and WRF (these instructions are specific to Snellius)
