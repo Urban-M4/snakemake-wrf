@@ -1,53 +1,115 @@
-configfile: "./config.yaml"
-workdir: config["output_directory"]
+configfile: workflow.source_path("config.yaml")
+envvars: "NETCDF"
 
-envvars:
-    "NETCDF",
+import f90nml
+from pathlib import Path
 
-rule DEFAULT:
-    # First rule is executed by default. It requires output of the last rule to be present.
-    input: "finished.clean"
+rule ALL_EXPERIMENTS:
+    input: expand("{experiment}/finished.clean", experiment=config["experiments"].keys())
 
 rule CREATE_WORKDIR:
-    input: workflow.source_path("namelist.wps"), workflow.source_path("GEOGRID.TBL"), workflow.source_path("namelist.input"), workflow.source_path("wrf.job")
-    output: "namelist.wps", "GEOGRID.TBL", "namelist.input"
-    shell: "cp {input} ."
-
-rule GEOGRID:
-    input: "namelist.wps", "GEOGRID.TBL"
-    output: "finished.geogrid"
+    input:
+        wrf_job = workflow.source_path("wrf.job")
+    output:
+        "{experiment}/GEOGRID.TBL",
+    params:
+        geogrid_table = lambda wildcards: workflow.source_path(config['experiments'][wildcards.experiment]['geogrid_table']),
     shell:
         """
+        mkdir -p {wildcards.experiment}
+        cd {wildcards.experiment}
+        cp {input.wrf_job} .
+        cp {params.geogrid_table} GEOGRID.TBL
+        """
+
+rule UPDATE_NAMELISTS:
+    input:
+        namelist_wps = workflow.source_path("namelist.wps"),
+        namelist_input = workflow.source_path("namelist.input"),
+    output:
+        "{experiment}/namelist.wps",
+        "{experiment}/namelist.input"
+    run:
+        geog_data_res = config['experiments'][wildcards.experiment]['geog_data_res']
+        geog_data_path = config['experiments'][wildcards.experiment]['geog_data_path']
+        num_land_cat = config['experiments'][wildcards.experiment]['num_land_cat']
+        run_w2w = config['experiments'][wildcards.experiment]["run_w2w"]
+
+        # Read source namelist.wps with f90nml, make some changes, and save in work dir
+        wps_path = Path(wildcards.experiment, "namelist.wps")
+        nml = f90nml.read(input.namelist_wps)
+        nml["geogrid"]["geog_data_path"] = geog_data_path
+        nml["geogrid"]["geog_data_res"] = geog_data_res
+        nml.write(wps_path)
+
+        # Read source namelist.input, make some changes, and save in work dir
+        input_path = Path(wildcards.experiment, "namelist.input")
+        nml_input = f90nml.read(input.namelist_input)
+        nml_input["physics"]["num_land_cat"] = num_land_cat
+        nml_input["physics"]["use_wudapt_lcz"] = 1 if run_w2w else 0
+        nml_input.write(input_path)
+
+
+rule GEOGRID:
+    input:
+        "{experiment}/namelist.wps",
+        geogrid = "{experiment}/GEOGRID.TBL"
+    output:
+        "{experiment}/finished.geogrid"
+    shell:
+        """
+        cd {wildcards.experiment}
+
+        ln -sf {input.geogrid} {config[wps_home]}
         {config[wps_home]}/geogrid.exe
+
+        # Scan logfile for errors and raise if necessary (geogrid can fail silently with 0 exit status)
+        grep "ERROR" geogrid.log && echo "Aborting: ERROR in geogrid.log." && exit 1
+
         touch finished.geogrid
         """
 
 rule W2W:
-    input: "finished.geogrid"
-    output: "finished.w2w"
-    shell:
-        """
-        w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
-        mv geo_em.d01_61.nc geo_em.d01.nc
-        mv geo_em.d02_61.nc geo_em.d02.nc
-        mv geo_em.d03_61.nc geo_em.d03.nc
-        mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
-        touch finished.w2w
-        """
+    input:
+        "{experiment}/finished.geogrid"
+    output:
+        "{experiment}/finished.w2w"
+    run:
+        if config['experiments'][wildcards.experiment]["run_w2w"]:
+            shell(
+                """
+                cd {wildcards.experiment}
+                w2w . /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif ./geo_em.d04.nc v4.5.2
+                # mv geo_em.d01_61.nc geo_em.d01.nc
+                # mv geo_em.d02_61.nc geo_em.d02.nc
+                # mv geo_em.d03_61.nc geo_em.d03.nc
+                # mv geo_em.d04_LCZ_params.nc geo_em.d04.nc
+                touch finished.w2w
+                """)
+        else:
+            shell(
+                """
+                cd {wildcards.experiment}
+                touch finished.w2w
+                """)
 
 rule UNGRIB:
-    input: "namelist.wps"
-    output: "finished.ungrib"
+    input:
+        "{experiment}/namelist.wps"
+    output:
+        "{experiment}/finished.ungrib"
     shell:
         """
+        cd {wildcards.experiment}
+
         # Remove old output if present (ungrib doesn't like to overwrite stuff)
         rm -f FILE*
 
         # Link vtable
-        cp {config[wps_home]}/ungrib/Variable_Tables/Vtable.GFS Vtable
+        cp {config[wps_home]}/ungrib/Variable_Tables/Vtable.ECMWF Vtable
 
         # Link gribfiles
-        {config[wps_home]}/link_grib.csh {config[data_home]}/real-time/gfs-data/*
+        {config[wps_home]}/link_grib.csh {config[data_home]}/real-time/july2019/*
 
         # Run ungrib
         {config[wps_home]}/ungrib.exe
@@ -61,13 +123,15 @@ rule UNGRIB:
 
 rule METGRID:
     input:
-        "namelist.wps",
-        "finished.ungrib",
-        "finished.geogrid",
-        "finished.w2w",  # TODO make conditional
-    output: "finished.metgrid"
+        "{experiment}/namelist.wps",
+        "{experiment}/finished.ungrib",
+        "{experiment}/finished.geogrid",
+        "{experiment}/finished.w2w",  # TODO make conditional
+    output: "{experiment}/finished.metgrid"
     shell:
         """
+        cd {wildcards.experiment}
+
         cp {config[wps_home]}/metgrid/METGRID.TBL.ARW METGRID.TBL
         {config[wps_home]}/metgrid.exe
 
@@ -78,19 +142,28 @@ rule METGRID:
         """
 
 rule REAL:
-    input: "namelist.input", "finished.metgrid"
-    output: "finished.real"
+    input:
+        "{experiment}/namelist.input",
+        "{experiment}/finished.metgrid"
+    output:
+        "{experiment}/finished.real"
     shell:
         """
+        cd {wildcards.experiment}
         {config[wrf_home]}/run/real.exe
         touch finished.real
         """
 
 rule WRF:
-    input: "namelist.input", "finished.real"
-    output: "finished.wrf"
+    input:
+        "{experiment}/namelist.input",
+        "{experiment}/finished.real"
+    output:
+        "{experiment}/finished.wrf"
     shell:
         """
+        cd {wildcards.experiment}
+
         # TODO link instead of cp and unlink after finishing?
         cp -f {config[wrf_home]}/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
         cp -f {config[wrf_home]}/run/ozone* .
@@ -105,10 +178,14 @@ rule WRF:
         """
 
 rule REORGANIZE_OUTPUT:
-    input: "finished.wrf"
-    output: "finished.clean"
+    input:
+        "{experiment}/finished.wrf"
+    output:
+        "{experiment}/finished.clean"
     shell:
         """
+        cd {wildcards.experiment}
+
         mkdir -p output/geogrid
         mkdir -p output/ungrib
         mkdir -p output/metgrid
