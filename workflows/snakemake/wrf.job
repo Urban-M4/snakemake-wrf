@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=wrf_experiment     # Job name
 #SBATCH --partition=thin              # Request thin partition. Up to one hour goes to fast queue
-#SBATCH --time=1:00:00                # Maximum runtime (D-HH:MM:SS)
+#SBATCH --time=00:05:00                # Maximum runtime (D-HH:MM:SS)
 #SBATCH --nodes=1                     # Number of nodes (one thin node has 128 cpu cores)
 #SBATCH --ntasks=64                   # Number of tasks per node / number of patches in the domain - parallelized with MPI / DMPAR / multiprocessing
 #SBATCH --cpus-per-task=2             # Number of CPU cores per task / number of tiles within each patch - parallelized with OpenMP / SMPAR / multithreading
