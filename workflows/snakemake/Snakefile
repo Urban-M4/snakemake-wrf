@@ -7,6 +7,9 @@ from pathlib import Path
 rule ALL_EXPERIMENTS:
     input: expand("{experiment}/finished.clean", experiment=config["experiments"].keys())
 
+rule UP_TO_REAL:
+    input: expand("{experiment}/finished.real", experiment=config["experiments"].keys())
+
 rule CREATE_WORKDIR:
     input:
         wrf_job = workflow.source_path("wrf.job")
