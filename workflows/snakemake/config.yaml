@@ -1,5 +1,5 @@
-wps_home: ~/wrf-model/WPS
-wrf_home: ~/wrf-model/WRF
+wps_home: ~/Urban-M4/WPS
+wrf_home: ~/Urban-M4/WRF
 data_home: /projects/0/prjs0914/wrf-data/default
 
 experiments:
