@@ -1,8 +1,11 @@
+import os
+from pathlib import Path
+
+import xarray as xr
+import f90nml
+
 configfile: workflow.source_path("config.yaml")
 envvars: "NETCDF"
-
-import f90nml
-from pathlib import Path
 
 rule ALL_EXPERIMENTS:
     input: expand("{experiment}/finished.clean", experiment=config["experiments"].keys())
@@ -62,8 +65,6 @@ rule GEOGRID:
     shell:
         """
         cd {wildcards.experiment}
-
-        ln -sf {input.geogrid} {config[wps_home]}
         {config[wps_home]}/geogrid.exe
 
         # Scan logfile for errors and raise if necessary (geogrid can fail silently with 0 exit status)
@@ -124,11 +125,26 @@ rule UNGRIB:
         touch finished.ungrib
          """
 
+rule ADD_42:
+    input: "{experiment}/finished.geogrid"
+    output: "{experiment}/finished.add42"
+    run:
+        for domain in ["d01", "d02", "d03", "d04"]:
+            filepath = Path(wildcards.experiment) / f"geo_em.{domain}.nc"
+            ds = xr.open_dataset(filepath)
+            ds['HITCHHIKER'] = xr.ones_like(ds['LU_INDEX']) * 42
+            ds['HITCHHIKER'].attrs = ds['LU_INDEX'].attrs
+            ds.close()
+            ds.to_netcdf(filepath, mode='a')
+
+        Path(output[0]).touch()
+
 rule METGRID:
     input:
         "{experiment}/namelist.wps",
         "{experiment}/finished.ungrib",
         "{experiment}/finished.geogrid",
+        "{experiment}/finished.add42",
         "{experiment}/finished.w2w",  # TODO make conditional
     output: "{experiment}/finished.metgrid"
     shell:
