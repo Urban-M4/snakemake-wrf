@@ -1,0 +1,2 @@
+workflows/snakemake/output
+workflows/snakemake/.snakemake
