@@ -1,4 +1,2 @@
-workflows/snakemake/modis_lcz
-workflows/snakemake/usgs
-workflows/snakemake/wur
+workflows/snakemake/output
 workflows/snakemake/.snakemake

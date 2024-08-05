@@ -1,6 +1,7 @@
 wps_home: ~/Urban-M4/WPS
 wrf_home: ~/Urban-M4/WRF
 data_home: /projects/0/prjs0914/wrf-data/default
+working_directory: ./output
 
 experiments:
   usgs:

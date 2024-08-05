@@ -5,6 +5,7 @@ import xarray as xr
 import f90nml
 
 configfile: workflow.source_path("config.yaml")
+workdir: config["working_directory"]
 envvars: "NETCDF"
 
 rule ALL_EXPERIMENTS:
