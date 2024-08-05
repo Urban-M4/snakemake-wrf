@@ -20,3 +20,6 @@ cd ../WPS
 ./compile &> log.compile &
 tail -f log.compile
 
+## Note
+# For WRF compiled with SMPAR + DMPAR, WPS doesn't compile geogrid and metgrid
+# See report and fix in https://github.com/wrf-model/WPS/issues/110 (add `-fopenmp`)
