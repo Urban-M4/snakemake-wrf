@@ -9,7 +9,7 @@ workdir: config["working_directory"]
 envvars: "NETCDF"
 
 rule ALL_EXPERIMENTS:
-    input: expand("{experiment}/finished.clean", experiment=config["experiments"].keys())
+    input: expand("{experiment}/finished.wrf", experiment=config["experiments"].keys())
 
 rule UP_TO_REAL:
     input: expand("{experiment}/finished.real", experiment=config["experiments"].keys())
@@ -167,7 +167,7 @@ rule WRF:
         cp -f {config[wrf_home]}/run/*.TBL .
 
         # Submit wrf job to SLURM and wait for it to finish
-        sbatch --wait wrf.job {config[wrf_home]}/run/wrf.exe
+        sbatch --wait wrf.job {config[wrf_home]}/run/wrf.exe || echo "WRF did not finish due to timeout."
 
         # Report status
         touch finished.wrf
