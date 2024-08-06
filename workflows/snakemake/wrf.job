@@ -11,6 +11,12 @@
 
 # Each process can do multithreading but limited to the number of cpu cores allocated to each process
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+# export OMP_PLACES=cores
+# export OMP_PROC_BIND=close
+
+# https://journal.fluidnumerics.com/wrf-v4-on-google-cloud#h.vin1ct6ww426
+export OMP_PLACES=threads
+export OMP_PROC_BIND=true
 
 # From WRF/run, submit as
 #   sbatch wrf.job
@@ -24,4 +30,8 @@ module load 2023
 module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
 export NETCDF=$(nf-config --prefix)
 
-mpiexec -np ${SLURM_NTASKS} --map-by node:PE=$OMP_NUM_THREADS --rank-by core $wrf_executable
+# mpiexec -np ${SLURM_NTASKS} --map-by node:PE=$OMP_NUM_THREADS --rank-by core $wrf_executable
+
+# https://journal.fluidnumerics.com/wrf-v4-on-google-cloud#h.vin1ct6ww426
+mpiexec -np ${SLURM_NTASKS} --map-by core --bind-to core $wrf_executable
+
