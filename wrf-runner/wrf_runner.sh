@@ -18,70 +18,39 @@ module load Python/3.11.3-GCCcore-12.3.0
 export NETCDF=/sw/arch/RHEL8/EB_production/2023/software/netCDF-Fortran/4.6.1-gompi-2023a
 export WPS_HOME=$HOME/wrf-model/WPS
 export WRF_HOME=$HOME/wrf-model/WRF
-export WRF_RUNNER=$HOME/Urban-M4/misc/wrf-runner
 export OUTPUT_DIR=$HOME/Urban-M4/experiments
 export DATA_HOME=/projects/0/prjs0914/wrf-data/default
 
-# Define experiment name and if w2w should be run (lcz setups only)
+# Set path to executables
+export WPS_HOME=$HOME/wrf-model/WPS
+export WRF_HOME=$HOME/wrf-model/WRF
+
+# Define experiment name
 EXP=USGS
-USE_W2W=false
 
-# Copy namelists and geogrid for experiment
-cp namelist.wps_$EXP namelist.wps
-cp namelist.input_$EXP namelist.input
-cp GEOGRID.TBL.ARW_$EXP GEOGRID.TBL
-
-# Create venv if it doesn't exist
-if test -d $WRF_RUNNER/venv; then
-  source venv/bin/activate
-else
-  python -m venv venv
-  source venv/bin/activate
-  # For modifying namelists programmatically
-  pip install f90nml
-  # TODO Install from pypi once branch is merged and released. 
-  # Might also not need python script.
-  pip install "git+https://github.com/matthiasdemuzere/w2w.git@add_wrf_version"
-fi
-
-# Make new run directory
-export RUNDIR=$OUTPUT_DIR/$(date +"%Y-%m-%d_%H-%M-%S")
+# Make new experiment directory
+export RUNDIR=wrf_experiments/${EXP}
 mkdir -p $RUNDIR
+
+# Copy experiment-dependent files
+cp namelist.wps_$EXP $RUNDIR/namelist.wps
+cp namelist.input_$EXP $RUNDIR/namelist.input
+cp GEOGRID.TBL.ARW_$EXP $RUNDIR/GEOGRID.TBL
+
+# Copy additional input files from WRF/WPS
 cd $RUNDIR
-echo $PWD
-f90nml $WRF_RUNNER/namelist.wps namelist.wps
+cp $WPS_HOME/metgrid/METGRID.TBL.ARW METGRID.TBL
+cp $WPS_HOME/ungrib/Variable_Tables/Vtable.ECMWF Vtable
+cp $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
+cp $WRF_HOME/run/ozone* .
+cp $WRF_HOME/run/RRTMG* .
+cp $WRF_HOME/run/*.TBL .
 
-# Run WPS
-f90nml -g geogrid -v opt_geogrid_tbl_path="'$WPS_HOME/geogrid/'" namelist.wps patched_nml && mv patched_nml namelist.wps
-f90nml -g metgrid -v opt_metgrid_tbl_path="'$WPS_HOME/metgrid'" namelist.wps patched_nml && mv patched_nml namelist.wps
-ln -sf $WPS_HOME/ungrib/Variable_Tables/Vtable.ECMWF Vtable
-ln -sf $WRF_RUNNER/GEOGRID.TBL $WPS_HOME/geogrid/GEOGRID.TBL  # make sure the right geogrid table is linked.
-$WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/july2019/*"
+# Run experiments
 $WPS_HOME/geogrid.exe
-
-# Run W2W
-if [$USE_W2W = true]; then
-  w2w $RUNDIR /projects/0/prjs0914/wrf-data/default/lcz/amsterdam_lcz4_clean.tif $RUNDIR/geo_em.d04.nc v4.5.2
-  python3 $WRF_RUNNER/../fix_w2w_lu_index.py $RUNDIR
-  mv $RUNDIR/geo_em.d01_61.nc $RUNDIR/geo_em.d01.nc
-  mv $RUNDIR/geo_em.d03_61.nc $RUNDIR/geo_em.d03.nc
-  mv $RUNDIR/geo_em.d04_LCZ_params.nc $RUNDIR/geo_em.d04.nc
-fi
-
-# Continue with WPS
+$WPS_HOME/link_grib.csh "${DATA_HOME}/real-time/july2019/*"
 $WPS_HOME/ungrib.exe
 $WPS_HOME/metgrid.exe
 
-# Link relevant files for WRF
-ln -sf $WRF_HOME/run/CAMtr_volume_mixing_ratio.RCP8.5 CAMtr_volume_mixing_ratio
-ln -sf $WRF_HOME/run/ozone* $RUNDIR
-ln -sf $WRF_HOME/run/RRTMG* $RUNDIR
-ln -sf $WRF_HOME/run/*.TBL $RUNDIR
-
-# Run WRF
-f90nml $WRF_RUNNER/namelist.input namelist.input
-$WRF_HOME/run/real.exe
-$WRF_HOME/run/wrf.exe
-
-# Report status
-status=$? && [ $status -eq 0 ] && echo "Run successful"
+$WRF_HOME/real.exe
+# $WRF_HOME/wrf.exe
