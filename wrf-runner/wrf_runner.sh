@@ -21,11 +21,6 @@ module load 2023
 module load netCDF-Fortran/4.6.1-gompi-2023a  # also loads gcc and gompi
 export NETCDF=$(nf-config --prefix)
 
-# Configure OpenMP threads & core affinity
-export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
-export OMP_PLACES=cores
-export OMP_PROC_BIND=close
-
 # Set some paths
 export NETCDF=/sw/arch/RHEL8/EB_production/2023/software/netCDF-Fortran/4.6.1-gompi-2023a
 export WPS_HOME=$HOME/wrf-model/WPS
