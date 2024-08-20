@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Script to prep input for wrf and perhaps also run wrf itself
+# though you probably want to configure another jobscript for that.
+#
+# Nice way to use it is, e.g.:
+#   srun -p staging -n 1 -t 01:00:00 --pty bash wrf_runner.sh WUR
+#
 #SBATCH --job-name=wrf_experiment     # Job name
 #SBATCH --partition=thin              # Partition or queue name
 #SBATCH --nodes=1                     # Number of nodes
@@ -64,4 +71,9 @@ $WPS_HOME/metgrid.exe
 grep "ERROR" metgrid.log && echo "Aborting: ERROR in metgrid.log." && exit 1
 
 $WRF_HOME/real.exe
+
+# Configure OpenMP thread affinity
+# export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+# export OMP_PLACES=cores
+# export OMP_PROC_BIND=close
 # srun $WRF_HOME/wrf.exe
