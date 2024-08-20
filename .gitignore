@@ -1,4 +1,3 @@
-wrf_runner/wrf_experiments
 workflows/snakemake/output
 workflows/snakemake/.snakemake
 wrf-runner/wrf_experiments
