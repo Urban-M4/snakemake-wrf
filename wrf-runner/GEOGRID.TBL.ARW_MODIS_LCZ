@@ -117,6 +117,7 @@ name=SOILCTOP
         rel_path=     10m:soiltype_top_10m/
         rel_path=  lowres:soiltype_top_5m/
         rel_path= default:soiltype_top_30s/
+        abs_path=       /projects/0/prjs0914/wrf-data/default/static/summerinthecity/soiltype_top_wur
 ===============================
 name=SOILCBOT
         priority=1
@@ -427,22 +428,20 @@ name = LAKE_DEPTH
 ===============================
 name=URB_PARAM
         priority=1
-        optional=yes
         dest_type=continuous
         fill_missing = 0.
         z_dim_name=num_urb_params
-        interp_option=default:nearest_neighbor
-        rel_path=default:NUDAPT44_1km/
+        interp_option=default:average_gcell(1.0)+four_pt+search
         flag_in_output=FLAG_URB_PARAM
+        abs_path=cglc_modis_lcz:/projects/0/prjs0914/wrf-data/default/static/summerinthecity/myurb
 ===============================
 name=FRC_URB2D
         priority=1
-        optional=yes
         dest_type=continuous
         fill_missing = 0.
         interp_option=default: average_gcell(2.0)+four_pt
-        rel_path=default:urbfrac_nlcd2011/
         flag_in_output=FLAG_FRC_URB2D
+        abs_path=cglc_modis_lcz:/projects/0/prjs0914/wrf-data/default/static/summerinthecity/urbanfraction
 ===============================
 name=IMPERV
         priority=1

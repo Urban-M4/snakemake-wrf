@@ -423,7 +423,6 @@ name = LAKE_DEPTH
 ===============================
 name=URB_PARAM
         priority=1
-        optional=yes
         dest_type=continuous
         fill_missing = 0.
         z_dim_name=num_urb_params
@@ -434,7 +433,6 @@ name=URB_PARAM
 ===============================
 name=FRC_URB2D
         priority=1
-        optional=yes
         dest_type=continuous
         fill_missing = 0.
         interp_option=default: average_gcell(2.0)+four_pt
