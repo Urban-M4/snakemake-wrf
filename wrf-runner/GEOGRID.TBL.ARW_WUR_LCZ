@@ -22,6 +22,13 @@ name = HGT_M
         rel_path =       default:topo_gmted2010_30s/
 ===============================
 name=LANDUSEF
+        priority = 2
+        dest_type = categorical
+        z_dim_name = land_cat
+        interp_option = cglc_modis_lcz:nearest_neighbor
+        rel_path = cglc_modis_lcz:CGLC_MODIS_LCZ_global/
+===============================
+name=LANDUSEF
         priority=1
         dest_type=categorical
         z_dim_name=land_cat
@@ -110,6 +117,7 @@ name=SOILCTOP
         rel_path=     10m:soiltype_top_10m/
         rel_path=  lowres:soiltype_top_5m/
         rel_path= default:soiltype_top_30s/
+        abs_path=       /projects/0/prjs0914/wrf-data/default/static/summerinthecity/soiltype_top_wur
 ===============================
 name=SOILCBOT
         priority=1
@@ -427,6 +435,7 @@ name=URB_PARAM
         interp_option=default:nearest_neighbor
         rel_path=default:NUDAPT44_1km/
         flag_in_output=FLAG_URB_PARAM
+        abs_path=cglc_modis_lcz:/projects/0/prjs0914/wrf-data/default/static/summerinthecity/myurb
 ===============================
 name=FRC_URB2D
         priority=1
@@ -436,6 +445,7 @@ name=FRC_URB2D
         interp_option=default: average_gcell(2.0)+four_pt
         rel_path=default:urbfrac_nlcd2011/
         flag_in_output=FLAG_FRC_URB2D
+        abs_path=cglc_modis_lcz:/projects/0/prjs0914/wrf-data/default/static/summerinthecity/urbanfraction
 ===============================
 name=IMPERV
         priority=1
