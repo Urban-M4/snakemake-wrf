@@ -28,10 +28,6 @@ export WRF_HOME=$HOME/wrf-model/WRF
 export OUTPUT_DIR=$HOME/Urban-M4/experiments
 export DATA_HOME=/projects/0/prjs0914/wrf-data/default
 
-# Set path to executables
-export WPS_HOME=$HOME/wrf-model/WPS
-export WRF_HOME=$HOME/wrf-model/WRF
-
 # Define experiment name; set here or pass in through command line
 # Options: USGS, MODIS_LCZ, WUR, WUR_LCZ
 EXP=USGS
@@ -65,10 +61,10 @@ grep "ERROR" geogrid.log && echo "Aborting: ERROR in geogrid.log." && exit 1
 $WPS_HOME/metgrid.exe
 grep "ERROR" metgrid.log && echo "Aborting: ERROR in metgrid.log." && exit 1
 
-$WRF_HOME/real.exe
+$WRF_HOME/run/real.exe
 
 # Configure OpenMP thread affinity
 # export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 # export OMP_PLACES=cores
 # export OMP_PROC_BIND=close
-# srun $WRF_HOME/wrf.exe
+# srun $WRF_HOME/run/wrf.exe
