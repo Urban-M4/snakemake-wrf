@@ -23,3 +23,9 @@ tail -f log.compile
 ## Note
 # For WRF compiled with SMPAR + DMPAR, WPS doesn't compile geogrid and metgrid
 # See report and fix in https://github.com/wrf-model/WPS/issues/110 (add `-fopenmp`)
+
+
+
+# Compiling with new cmake workflow
+./configure_new -p GNU -x -- -DUSE_MPI=ON -DUSE_OPENMP=ON -DWRF_NESTING=BASIC
+srun -p staging -n 8 -t 01:00:00 --pty ./compile_new -j 8

@@ -5,13 +5,14 @@ start_date = '2019-07-23_06:00:00','2019-07-23_06:00:00','2019-07-23_06:00:00','
 end_date   = '2019-07-25_18:00:00','2019-07-25_18:00:00','2019-07-25_18:00:00','2019-07-25_18:00:00'
 interval_seconds = 3600
 io_form_geogrid = 2,
+opt_output_from_geogrid_path = 'geogrid'
 /
 
 &geogrid
 parent_id         = 1,     1,   2,    3,
 parent_grid_ratio = 1,     5,   5,    5,
 i_parent_start    = 1,    44,  51,   40,
-j_parent_start    = 1,    52,  48,   49,        
+j_parent_start    = 1,    52,  48,   49,
 e_we              = 120, 121, 121,  221,
 e_sn              = 120, 121, 121,  166,
 geog_data_res     =   'cglc_modis_lcz+default','cglc_modis_lcz+default','cglc_modis_lcz+default','cglc_modis_lcz+default'
@@ -36,6 +37,7 @@ prefix = 'FILE',
 fg_name = 'FILE'
 io_form_metgrid = 2,
 opt_metgrid_tbl_path = '.'
+opt_output_from_metgrid_path = 'metgrid'
 /
 
 &mod_levs
