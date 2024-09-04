@@ -26,7 +26,7 @@ rule GEOGRID:
     output:
         "{experiment}/finished.geogrid",
     params:
-        geogrid_table=lambda wildcards: workflow.source_path(
+        geogrid_table=lambda wildcards: workflow.source_path("../../resources/"+
             config["experiments"][wildcards.experiment]["geogrid_table"]
         ),
     shell:
