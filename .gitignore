@@ -1,3 +1,5 @@
-workflows/snakemake/output
-workflows/snakemake/.snakemake
-wrf-runner/wrf_experiments
+results/**
+resources/**
+logs/**
+.snakemake
+.snakemake/**
