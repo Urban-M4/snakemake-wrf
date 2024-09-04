@@ -2,21 +2,21 @@ from pathlib import Path
 
 import f90nml
 
-
 rule UPDATE_NAMELIST_WRF:
     input:
-        namelist_input=workflow.source_path("../../resources/namelist.input"),
+       Path(workflow.workdir_init) /"resources"/"namelist.input"
     output:
         "{experiment}/namelist.input",
     run:
         num_land_cat = config["experiments"][wildcards.experiment]["num_land_cat"]
         use_wudapt_lcz = config["experiments"][wildcards.experiment]["use_wudapt_lcz"]
 
-        input_path = Path(wildcards.experiment, "namelist.input")
-        nml_input = f90nml.read(input.namelist_input)
+        nml_input = f90nml.read(input)
         nml_input["physics"]["num_land_cat"] = num_land_cat
         nml_input["physics"]["use_wudapt_lcz"] = 1 if use_wudapt_lcz else 0
-        nml_input.write(input_path)
+
+        namelist_path = Path(wildcards.experiment, "namelist.input")
+        nml_input.write(namelist_path)
 
 
 rule REAL:
@@ -37,7 +37,7 @@ rule WRF:
     input:
         "{experiment}/namelist.input",
         "{experiment}/finished.real",
-        wrf_job=workflow.source_path("../../resources/wrf.job"),
+        wrf_job = Path(workflow.workdir_init)/ "resources"/"wrf.job",
     output:
         "{experiment}/finished.wrf",
     shell:

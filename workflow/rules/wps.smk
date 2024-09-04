@@ -5,7 +5,7 @@ import f90nml
 
 rule UPDATE_NAMELIST_WPS:
     input:
-        namelist_wps=workflow.source_path("../../resources/namelist.wps"),
+        namelist_wps=Path(workflow.workdir_init) / "resources" / "namelist.wps",
     output:
         "{experiment}/namelist.wps",
     run:
@@ -26,9 +26,7 @@ rule GEOGRID:
     output:
         "{experiment}/finished.geogrid",
     params:
-        geogrid_table=lambda wildcards: workflow.source_path("../../resources/"+
-            config["experiments"][wildcards.experiment]["geogrid_table"]
-        ),
+        geogrid_table=lambda wildcards: Path(workflow.workdir_init) / "resources" / config["experiments"][wildcards.experiment]["geogrid_table"],
     shell:
         """
         cd {wildcards.experiment}
