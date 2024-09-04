@@ -44,6 +44,5 @@ snakemake --dag WRF_all | dot -Tpng > dag.png
 
 ## Notes
 
-- ungrib and metgrid fail with 0 exit status. https://github.com/wrf-model/WPS/issues/252
-  - Read the logfile and scan for error
+- ungrib and metgrid fail with 0 exit status. https://github.com/wrf-model/WPS/issues/252, thus read the logfile and scan for error
 - ungrib doesn't overwrite existing FILE, instead raises "Fortran runtime error: Cannot open file ... file exists."
