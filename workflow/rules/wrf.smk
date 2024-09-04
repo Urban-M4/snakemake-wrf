@@ -2,9 +2,10 @@ from pathlib import Path
 
 import f90nml
 
+
 rule UPDATE_NAMELIST_WRF:
     input:
-       Path(workflow.workdir_init) /"resources"/"namelist.input"
+        Path(workflow.workdir_init) / "resources" / "namelist.input",
     output:
         "{experiment}/namelist.input",
     run:
@@ -37,7 +38,7 @@ rule WRF:
     input:
         "{experiment}/namelist.input",
         "{experiment}/finished.real",
-        wrf_job = Path(workflow.workdir_init)/ "resources"/"wrf.job",
+        wrf_job=Path(workflow.workdir_init) / "resources" / "wrf.job",
     output:
         "{experiment}/finished.wrf",
     shell:
