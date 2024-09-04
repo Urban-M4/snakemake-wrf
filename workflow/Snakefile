@@ -1,16 +1,30 @@
 configfile: "config/config.yaml"
+
+
 workdir: "results"
-envvars: "NETCDF"
+
+
+envvars:
+    "NETCDF",
+
 
 include: "rules/wps.smk"
 include: "rules/wrf.smk"
 include: "rules/analysis.smk"
 
+
 rule run_wps:
-    input: collect("{experiment}/finished.metgrid", experiment=config["experiments"].keys())
+    input:
+        collect(
+            "{experiment}/finished.metgrid", experiment=config["experiments"].keys()
+        ),
+
 
 rule run_real:
-    input: collect("{experiment}/finished.real", experiment=config["experiments"].keys())
+    input:
+        collect("{experiment}/finished.real", experiment=config["experiments"].keys()),
+
 
 rule run_wrf:
-    input: collect("{experiment}/finished.wrf", experiment=config["experiments"].keys())
+    input:
+        collect("{experiment}/finished.wrf", experiment=config["experiments"].keys()),

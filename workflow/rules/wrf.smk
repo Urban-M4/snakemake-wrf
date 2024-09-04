@@ -2,14 +2,15 @@ from pathlib import Path
 
 import f90nml
 
+
 rule UPDATE_NAMELIST_WRF:
     input:
-        namelist_input = workflow.source_path("../../resources/namelist.input")
+        namelist_input=workflow.source_path("../../resources/namelist.input"),
     output:
-        "{experiment}/namelist.input"
+        "{experiment}/namelist.input",
     run:
-        num_land_cat = config['experiments'][wildcards.experiment]['num_land_cat']
-        use_wudapt_lcz = config['experiments'][wildcards.experiment]["use_wudapt_lcz"]
+        num_land_cat = config["experiments"][wildcards.experiment]["num_land_cat"]
+        use_wudapt_lcz = config["experiments"][wildcards.experiment]["use_wudapt_lcz"]
 
         input_path = Path(wildcards.experiment, "namelist.input")
         nml_input = f90nml.read(input.namelist_input)
@@ -21,9 +22,9 @@ rule UPDATE_NAMELIST_WRF:
 rule REAL:
     input:
         "{experiment}/namelist.input",
-        "{experiment}/finished.metgrid"
+        "{experiment}/finished.metgrid",
     output:
-        "{experiment}/finished.real"
+        "{experiment}/finished.real",
     shell:
         """
         cd {wildcards.experiment}
@@ -31,13 +32,14 @@ rule REAL:
         touch finished.real
         """
 
+
 rule WRF:
     input:
         "{experiment}/namelist.input",
         "{experiment}/finished.real",
-        wrf_job = workflow.source_path("../../resources/wrf.job")
+        wrf_job=workflow.source_path("../../resources/wrf.job"),
     output:
-        "{experiment}/finished.wrf"
+        "{experiment}/finished.wrf",
     shell:
         """
         cd {wildcards.experiment}
