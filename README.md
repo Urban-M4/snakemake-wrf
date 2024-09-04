@@ -2,7 +2,7 @@
 
 A snakemake workflow to run WRF, including pre- and postprocessing. See our [blog post]() for a detailed description.
 
-![Task graph of WRF workflow](WRF.png)
+![Task graph of WRF workflow](workflow_dag.png)
 
 Multiple experiments are defined in config.yaml:
 
