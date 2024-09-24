@@ -108,17 +108,35 @@ def calc_q(RH, T2M):
     return q
 
 
-def get_q_from_wrfout_file(filename):
+def get_wrfout_var(filename, variable, itime):
+    return salem.open_wrf_dataset(filename)[variable].isel(itime)
+
+
+def get_wrfout_uhi(filename, itime, landuse):
+    """Get temperature as offset from rural reference."""
+    lu_index = salem.open_wrf_dataset(filename)["LU_INDEX"].isel(itime)
+    t2 = salem.open_wrf_dataset(filename)["T2"].isel(itime)
+
+    # TODO: can we get rid of the dims?
+    dims = ("west_east", "south_north")
+
+    if landuse == "MODIS":
+        rural_reference = t2.where(lu_index < 51).mean(dims)
+    elif landuse == "USGS":
+        rural_reference = t2.where(lu_index != 1).mean(dims)
+    else:
+        raise ValueError(f"Unknown landuse {landuse}")
+
+    return t2 - rural_reference
+
+
+def get_wrfout_q(filename, itime):
     """Read the relevant variables from wrfout file and calculate q."""
-    wur_file = salem.open_wrf_dataset(filename)
+    ds = salem.open_wrf_dataset(filename)
 
-    # Extract variables to calculate RH and calculate RH
-    wur_q2 = wur_file.Q2.isel(time=34)
-    wur_t2 = wur_file.T2.isel(time=34)
-    wur_psfc = wur_file.PSFC.isel(time=34)
+    q2 = ds["Q2"].isel(time=itime)
+    t2 = ds["T2"].isel(time=itime)
+    psfc = ds["PSFC"].isel(time=itime)
 
-    wur_rh = wrf.rh(wur_q2, wur_psfc, wur_t2)
-
-    # Calculate q
-    wur_q = calc_q(wur_rh, wur_t2)
-    return wur_q
+    rh = wrf.rh(q2, psfc, t2)
+    return calc_q(rh, t2)
