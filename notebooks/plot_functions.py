@@ -3,6 +3,9 @@ import salem
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import wrf
+import numpy as np
+from matplotlib.colors import BoundaryNorm
+from matplotlib.colors import LinearSegmentedColormap
 
 
 def get_extent(variable):
@@ -46,9 +49,6 @@ def plot_colormesh(fig, ax, variable, unit, **kwargs):
     """Add a colormesh on top of a figure with UrbanM4 style."""
 
     cm_options = dict(
-        vmin=None,
-        vmax=None,
-        cmap=None,
         transform=ccrs.PlateCarree(),
     ).update(kwargs)
 
@@ -140,3 +140,87 @@ def get_wrfout_q(filename, itime):
 
     rh = wrf.rh(q2, psfc, t2)
     return calc_q(rh, t2)
+
+
+def generate_cmap_for_landuse(landuse_name):
+    if landuse_name == "MODIS":
+        colors = [
+            [0.43, 0.89, 1.0],
+            [0.67, 0.94, 1.0],
+            [1.0, 0.77, 0.89],
+            [1.0, 0.6, 0.8],
+            [1.0, 0.0, 1.0],
+            [0.50, 0.0, 0.50],
+            [0.0, 0.0, 0.50],
+            [0.27, 0.27, 1.0],
+            [0.2, 0.4, 1.0],
+            [0.52, 0.64, 1.0],
+            [1.0, 1.0, 1.0],  # URBAN IN ORIGINAL FILE
+            [0.8, 0.8, 0.8],
+            [0.70, 0.70, 0.70],
+            [0.0, 0.0, 0.0],
+            [0.6, 0.6, 0.6],
+            [0.35, 0.35, 0.35],
+            [0.50, 0.50, 0.0],
+            [0.0, 0.36, 0.0],
+            [0.0, 0.50, 0.0],
+            [0.2, 0.6, 0.4],
+            [0.62, 0.84, 0.0],
+            # TODO add 20 more grays
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.83, 1.0, 0.35],
+            [1.0, 1.0, 0.0],
+            [1.0, 0.72, 0.44],
+            [1.0, 0.6, 0.0],
+            [1.0, 0.4, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.64, 0.44, 1.0],
+            [0.74, 0.29, 0.0],
+            [0.67, 0.0, 0.22],
+            [0.52, 0.0, 0.0],
+        ]
+    elif landuse_name == "USGS":
+        colors = np.array(
+            [
+                [1, 0, 0],  #  1 Urban and Built-up Land
+                [1, 1, 0],  #! 2 Dryland Cropland and Pasture
+                [1, 1, 0.2],  #  3 Irrigated Cropland and Pasture
+                [1, 1, 0.3],  #  4 Mixed Dryland/Irrigated Cropland and Pasture
+                [0.7, 0.9, 0.3],  #  5 Cropland/Grassland Mosaic
+                [0.7, 0.9, 0.3],  #  6 Cropland/Woodland Mosaic
+                [0, 1, 0],  #  7 Grassland
+                [0.3, 0.7, 0],  #  8 Shrubland
+                [0.82, 0.41, 0.12],  #  9 Mixed Shrubland/Grassland
+                [1, 0.84, 0.0],  #  10 Savanna
+                [0.2, 0.8, 0.4],  #  11 Deciduous Broadleaf Forest
+                [0.2, 0.8, 0.2],  #  12 Deciduous Needleleaf Forest
+                [0, 0.4, 0.2],  #  13 Evergreen Broadleaf Forest
+                [0, 0.4, 0],  #! 14 Evergreen Needleleaf Forest
+                [0.2, 0.6, 0.2],  #  15 Mixed Forests
+                [0, 0, 0.88],  #  16 Water Bodies
+                [0, 1, 1],  #! 17 Herbaceous Wetlands
+                [0.2, 1, 1],  #  18 Wooden Wetlands
+                [0.914, 0.914, 0.7],  #  19 Barren or Sparsely Vegetated
+                [0.86, 0.08, 0.23],  #  20 Herbaceous Tundraa
+                [0.86, 0.08, 0.23],  #  21 Wooded Tundra
+                [0.97, 0.5, 0.31],  #! 22 Mixed Tundra
+                [0.91, 0.59, 0.48],  #! 23 Barren Tundra
+                [1, 1, 1],  #! 24 Snow and Ice
+            ]
+        )
+
+    nlevs = len(colors)
+    cmap = LinearSegmentedColormap.from_list("luse", colors, N=nlevs)
+    levels = np.arange(nlevs)
+    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+    return cmap, norm
