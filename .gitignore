@@ -1,2 +1,5 @@
-workflows/snakemake/output
-workflows/snakemake/.snakemake
+results/**
+resources/**
+logs/**
+.snakemake
+.snakemake/**
