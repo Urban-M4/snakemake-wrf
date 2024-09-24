@@ -71,13 +71,14 @@ def plot_colormesh(fig, ax, variable, unit, **kwargs):
 def side_by_side_plot(variables, titles, unit, **kwargs):
     """Plot two colormesh figures side by side."""
     fig = plt.figure(figsize=(15, 5))
-
+    axes = []
     for i, (variable, title) in enumerate(zip(variables, titles)):
         ax = add_subplot(fig, 1, 2, i, title)
         ax.set_extent(get_extent(variable))
         plot_colormesh(fig, ax, variable, unit, **kwargs)
+        axes.append(ax)
 
-    return fig
+    return fig, axes
 
 
 def plot_difference(variables, titles, unit, **kwargs):
@@ -94,7 +95,7 @@ def plot_difference(variables, titles, unit, **kwargs):
 
     plot_colormesh(fig, ax, diff, unit, **kwargs)
 
-    return fig
+    return fig, ax
 
 
 # Open file
@@ -109,7 +110,15 @@ def calc_q(RH, T2M):
 
 
 def get_wrfout_var(filename, variable, itime):
+    """Extract variable from wrfout file at given time."""
     return salem.open_wrf_dataset(filename)[variable].isel(itime)
+
+
+def get_wrfout_wspd(filename, itime):
+    """Get wind speed at 10 m from wrfout file."""
+    u10 = salem.open_wrf_dataset(filename)["U10"].isel(itime)
+    v10 = salem.open_wrf_dataset(filename)["V10"].isel(itime)
+    return np.sqrt(u10**2 + v10**2)
 
 
 def get_wrfout_uhi(filename, itime, landuse):
