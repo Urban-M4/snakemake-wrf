@@ -1,6 +1,6 @@
 # Snakemake WRF
 
-A snakemake workflow to run WRF, including pre- and postprocessing. See our [blog post]() for a detailed description.
+A snakemake workflow to run WRF, including pre- and postprocessing. See our [blog post](https://blog.esciencecenter.nl/un-wieldy-workflows-with-wrf-4a4947b88a98) for a detailed description.
 
 ![Task graph of WRF workflow](workflow_dag.png)
 
