@@ -50,7 +50,10 @@ def plot_colormesh(fig, ax, variable, unit, **kwargs):
 
     cm_options = dict(
         transform=ccrs.PlateCarree(),
-    ).update(kwargs)
+    )
+
+    if kwargs is not None:
+        cm_options.update(kwargs)
 
     colormesh = ax.pcolormesh(
         variable.lon,
@@ -73,7 +76,7 @@ def side_by_side_plot(variables, titles, unit, **kwargs):
     fig = plt.figure(figsize=(15, 5))
     axes = []
     for i, (variable, title) in enumerate(zip(variables, titles)):
-        ax = add_subplot(fig, 1, 2, i, title)
+        ax = add_subplot(fig, 1, 2, i+1, title)
         ax.set_extent(get_extent(variable))
         plot_colormesh(fig, ax, variable, unit, **kwargs)
         axes.append(ax)
@@ -90,7 +93,7 @@ def plot_difference(variables, titles, unit, **kwargs):
     title = f"{titles[1]} - {titles[0]}"
 
     fig = plt.figure(figsize=(15, 5))
-    ax = add_subplot(1, 1, 1, title)
+    ax = add_subplot(fig, 1, 1, 1, title)
     ax.set_extent(get_extent(diff))
 
     plot_colormesh(fig, ax, diff, unit, **kwargs)
@@ -111,20 +114,20 @@ def calc_q(RH, T2M):
 
 def get_wrfout_var(filename, variable, itime):
     """Extract variable from wrfout file at given time."""
-    return salem.open_wrf_dataset(filename)[variable].isel(itime)
+    return salem.open_wrf_dataset(filename)[variable].isel(time=itime)
 
 
 def get_wrfout_wspd(filename, itime):
     """Get wind speed at 10 m from wrfout file."""
-    u10 = salem.open_wrf_dataset(filename)["U10"].isel(itime)
-    v10 = salem.open_wrf_dataset(filename)["V10"].isel(itime)
+    u10 = salem.open_wrf_dataset(filename)["U10"].isel(time=itime)
+    v10 = salem.open_wrf_dataset(filename)["V10"].isel(time=itime)
     return np.sqrt(u10**2 + v10**2)
 
 
 def get_wrfout_uhi(filename, itime, landuse):
     """Get temperature as offset from rural reference."""
-    lu_index = salem.open_wrf_dataset(filename)["LU_INDEX"].isel(itime)
-    t2 = salem.open_wrf_dataset(filename)["T2"].isel(itime)
+    lu_index = salem.open_wrf_dataset(filename)["LU_INDEX"].isel(time=itime)
+    t2 = salem.open_wrf_dataset(filename)["T2"].isel(time=itime)
 
     # TODO: can we get rid of the dims?
     dims = ("west_east", "south_north")
