@@ -28,3 +28,7 @@ rule run_real:
 rule run_wrf:
     input:
         collect("{experiment}/finished.wrf", experiment=config["experiments"].keys()),
+
+rule reproduce_results:
+    input:
+        "logs/notebooks/analyse_output.ipynb"
