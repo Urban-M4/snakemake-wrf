@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import wrf
 import numpy as np
 from matplotlib.colors import BoundaryNorm
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 
 def get_extent(variable):
@@ -182,17 +182,49 @@ def generate_cmap_for_landuse(landuse_name):
             [0.86, 0.08, 0.23],  #18  21 Wooded Tundra
             [0.97, 0.5, 0.31],  #19 22 Mixed Tundra
             [0.91, 0.59, 0.48],  #20 23 Barren Tundra
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
-            [1, 0, 0],  #13  1 Urban and Built-up Land
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [0.70, 0.70, 0.70],
+            [1, 0.5, 0], # LCZ
+            [1, 0.3, 0], # LCZ
+            [1, 0.2, 0], # LCZ
+            [1, 0, 0], # LCZ
+            [0.9, 0, 0], # LCZ
+            [0.7, 0, 0], # LCZ
+            [0.6, 0.1, 0.1], # LCZ
+            [0.5, 0, 0], # LCZ
+            [0.4, 0, 0], # LCZ
+            [0.3, 0.1, 0.1] # LCZ
         ]
+
+
     elif landuse_name == "USGS":
         colors = np.array(
             [
