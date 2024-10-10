@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import wrf
 import numpy as np
 from matplotlib.colors import BoundaryNorm
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
 
 def get_extent(variable):
@@ -158,30 +158,30 @@ def get_wrfout_q(filename, itime):
 
 
 def generate_cmap_for_landuse(landuse_name):
+    """Mapping of MODIS and USGS landuse categories to similar colours, based on
+    https://www.researchgate.net/figure/Land-use-mapping-using-the-20-category-IGBP-Modified-MODIS-and-24-category-USGS-schemes_tbl2_262952739"""
     if landuse_name == "MODIS":
         colors = [
-            [0.43, 0.89, 1.0],
-            [0.67, 0.94, 1.0],
-            [1.0, 0.77, 0.89],
-            [1.0, 0.6, 0.8],
-            [1.0, 0.0, 1.0],
-            [0.50, 0.0, 0.50],
-            [0.0, 0.0, 0.50],
-            [0.27, 0.27, 1.0],
-            [0.2, 0.4, 1.0],
-            [0.52, 0.64, 1.0],
-            [1.0, 1.0, 1.0],  # URBAN IN ORIGINAL FILE
-            [0.8, 0.8, 0.8],
-            [0.70, 0.70, 0.70],
-            [0.0, 0.0, 0.0],
-            [0.6, 0.6, 0.6],
-            [0.35, 0.35, 0.35],
-            [0.50, 0.50, 0.0],
-            [0.0, 0.36, 0.0],
-            [0.0, 0.50, 0.0],
-            [0.2, 0.6, 0.4],
-            [0.62, 0.84, 0.0],
-            [0.70, 0.70, 0.70],
+            [0, 0.4, 0],  #1 14 Evergreen Needleleaf Forest
+            [0, 0.4, 0.2],  #2  13 Evergreen Broadleaf Forest
+            [0.2, 0.8, 0.2],  #3  12 Deciduous Needleleaf Forest
+            [0.2, 0.8, 0.4],  #4  11 Deciduous Broadleaf Forest
+            [0.2, 0.6, 0.2],  #5  15 Mixed Forests
+            [0.3, 0.7, 0],  #6  8 Shrubland
+            [0.82, 0.41, 0.12],  #7  9 Mixed Shrubland/Grassland
+            [1, 0.84, 0.0],  #8  10 Savanna
+            [1, 0.84, 0.0],  #9  10 Savanna
+            [0, 1, 0],  # 10 7 Grassland
+            [0, 1, 1],  #11 17 Herbaceous Wetlands
+            [1, 1, 0.2],  #  3 Irrigated Cropland and Pasture
+            [1, 0, 0],  #13  1 Urban and Built-up Land
+            [0.7, 0.9, 0.3],  #  5 Cropland/Grassland Mosaic
+            [1, 1, 1],  #15 24 Snow and Ice
+            [0.914, 0.914, 0.7],  #16  19 Barren or Sparsely Vegetated
+            [0, 0, 0.88],  #17  16 Water Bodies
+            [0.86, 0.08, 0.23],  #18  21 Wooded Tundra
+            [0.97, 0.5, 0.31],  #19 22 Mixed Tundra
+            [0.91, 0.59, 0.48],  #20 23 Barren Tundra
             [0.70, 0.70, 0.70],
             [0.70, 0.70, 0.70],
             [0.70, 0.70, 0.70],
@@ -212,17 +212,19 @@ def generate_cmap_for_landuse(landuse_name):
             [0.70, 0.70, 0.70],
             [0.70, 0.70, 0.70],
             [0.70, 0.70, 0.70],
-            [0.83, 1.0, 0.35],
-            [1.0, 1.0, 0.0],
-            [1.0, 0.72, 0.44],
-            [1.0, 0.6, 0.0],
-            [1.0, 0.4, 0.0],
-            [1.0, 0.0, 0.0],
-            [0.64, 0.44, 1.0],
-            [0.74, 0.29, 0.0],
-            [0.67, 0.0, 0.22],
-            [0.52, 0.0, 0.0],
+            [1, 0.5, 0], # LCZ
+            [1, 0.3, 0], # LCZ
+            [1, 0.2, 0], # LCZ
+            [1, 0, 0], # LCZ
+            [0.9, 0, 0], # LCZ
+            [0.7, 0, 0], # LCZ
+            [0.6, 0.1, 0.1], # LCZ
+            [0.5, 0, 0], # LCZ
+            [0.4, 0, 0], # LCZ
+            [0.3, 0.1, 0.1] # LCZ
         ]
+
+
     elif landuse_name == "USGS":
         colors = np.array(
             [
@@ -255,6 +257,6 @@ def generate_cmap_for_landuse(landuse_name):
 
     nlevs = len(colors)
     cmap = LinearSegmentedColormap.from_list("luse", colors, N=nlevs)
-    levels = np.arange(nlevs)
+    levels = np.arange(nlevs)+1
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
     return cmap, norm
